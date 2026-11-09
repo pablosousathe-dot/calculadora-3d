@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora de Impressão 3D</title>
+<meta name="description" content="Calcule custo, preço de venda e lucro de impressões 3D. Grátis.">
+<meta name="theme-color" content="#0f1720">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Calc 3D">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+:root{
+  --bg:#0f1720;--card:#17212c;--card2:#1d2936;--line:#2a3846;--txt:#e8eef4;--mut:#8fa1b3;
+  --acc:#ff7a1a;--acc2:#ffb066;--ok:#3ecf8e;--in:#0f1720;--chip:#22303e;
+  --r:14px;
+}
+@media (prefers-color-scheme: light){
+  :root{--bg:#f3f5f8;--card:#fff;--card2:#f7f9fb;--line:#dde3ea;--txt:#15202b;--mut:#5d6b79;--in:#fff;--chip:#eef2f6;--acc:#e8620a;--ok:#1a9d63}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:center;gap:12px;margin:4px 0 18px}
+.logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--acc),#ffb066);display:grid;place-items:center;flex:none}
+.logo svg{width:26px;height:26px}
+h1{font-size:20px;margin:0;letter-spacing:-.01em}
+header p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.grid{grid-template-columns:1.25fr 1fr;align-items:start}.side{position:sticky;top:16px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card+.card{margin-top:16px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc2);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+@media (prefers-color-scheme: light){h2{color:var(--acc)}}
+h2 .n{background:var(--acc);color:#fff;border-radius:6px;width:20px;height:20px;display:inline-grid;place-items:center;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:12.5px;color:var(--mut);margin:0 0 5px}
+.f{margin-bottom:12px;position:relative}
+input,select{width:100%;background:var(--in);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px;outline:none;transition:border .15s}
+input:focus,select:focus{border-color:var(--acc)}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238fa1b3' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.pre{position:relative}
+.pre span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none;font-size:14px}
+.pre input{padding-left:38px}
+.suf span{left:auto;right:12px}
+.suf input{padding-left:12px;padding-right:46px}
+.info{display:flex;gap:10px;flex-wrap:wrap;margin:-2px 0 12px}
+.pill{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px}
+.pill b{color:var(--acc2)}
+@media (prefers-color-scheme: light){.pill b{color:var(--acc)}}
+.hint{font-size:12px;color:var(--mut);margin-top:5px}
+details{margin-top:4px}
+summary{cursor:pointer;color:var(--mut);font-size:13px;padding:4px 0;list-style:none}
+summary::before{content:"▸ ";}
+details[open] summary::before{content:"▾ ";}
+/* seletor de tempo */
+.tp{position:relative}
+.tp .box{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--in);overflow:hidden}
+.tp .box:focus-within{border-color:var(--acc)}
+.tp button.st{background:transparent;border:0;color:var(--txt);width:36px;font-size:20px;cursor:pointer;flex:none}
+.tp button.st:active{background:var(--chip)}
+.tp input{border:0;text-align:center;padding:11px 0;min-width:0;border-radius:0}
+.tp .unit{font-size:11px;color:var(--mut);text-align:center;margin-top:4px}
+.pop{position:absolute;z-index:20;left:0;right:0;top:calc(100% - 14px);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:5px;max-height:220px;overflow:auto;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+@media(max-width:520px){.pop{position:fixed;left:12px;right:12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom));max-height:45vh;grid-template-columns:repeat(6,1fr)}}
+.pop.open{display:grid}
+.pop button{background:var(--chip);border:1px solid transparent;color:var(--txt);border-radius:8px;padding:9px 0;font:inherit;font-size:15px;cursor:pointer}
+.pop button.sel{background:var(--acc);color:#fff}
+.pop button.hl{border-color:var(--acc)}
+.pop .ttl{grid-column:1/-1;font-size:12px;color:var(--mut);padding:2px 4px 4px}
+/* resultado */
+.res .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.res .line span:first-child{color:var(--mut)}
+.res .line.sub{font-weight:600}
+.res .line.sub span:first-child{color:var(--txt)}
+.big{background:linear-gradient(135deg,rgba(255,122,26,.16),rgba(255,176,102,.06));border:1px solid rgba(255,122,26,.45);border-radius:12px;padding:14px;margin:14px 0 10px}
+.big small{display:block;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.big .v{font-size:32px;font-weight:750;letter-spacing:-.02em;margin-top:2px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px}
+.mini small{display:block;color:var(--mut);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em}
+.mini .v{font-size:19px;font-weight:700;margin-top:2px}
+.mini.ok .v{color:var(--ok)}
+.bar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:14px 0 6px;background:var(--chip)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--mut)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{flex:1;min-width:140px;border:0;border-radius:10px;padding:12px;font:inherit;font-weight:650;cursor:pointer;background:var(--acc);color:#fff}
+.btn.sec{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ok);color:#06231a;font-weight:650;padding:10px 16px;border-radius:10px;transition:transform .25s,opacity .25s;opacity:0;z-index:50}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+footer{color:var(--mut);font-size:12px;text-align:center;margin-top:24px;line-height:1.6}
+.warn{color:var(--acc2)}
+#installBox{display:none}
+
+.tabs button.on.doe{background:#e64980}
+#modeDoe .card{max-width:620px;margin:0 auto;text-align:center}
+#modeDoe .heart{font-size:52px;line-height:1;margin:6px 0 4px}
+#modeDoe h2{justify-content:center;color:#f06595}
+#modeDoe p{color:var(--mut);margin:6px 0 16px}
+.donor{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;text-align:left}
+.donor .lbl{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.donor .val{font-size:20px;font-weight:700;margin-top:2px;word-break:break-word}
+.donor .rowc{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.donor .btn{flex:none;min-width:0;padding:10px 16px;background:#e64980}
+.pix{display:inline-flex;align-items:center;background:#32bcad;color:#fff;font-weight:750;border-radius:999px;padding:6px 14px;font-size:15px}
+.picpay{display:inline-flex;align-items:center;gap:8px;background:#21c25e;color:#fff;font-weight:750;border-radius:999px;padding:6px 14px;font-size:15px}
+.steps{text-align:left;margin:8px 0 0;padding-left:20px;color:var(--txt)}
+.steps li{margin:6px 0}
+.doelink{display:inline-block;margin-top:14px;color:#f06595;background:none;border:0;font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+/* escolha de modo */
+.chooser{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.chooser.hide{display:none}
+.chooser .in{max-width:760px;width:100%;text-align:center}
+.chooser h1{font-size:24px;margin:10px 0 6px}
+.chooser p.sub{color:var(--mut);margin:0 0 22px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.choices{grid-template-columns:1fr}}
+.choice{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:22px 18px;cursor:pointer;color:var(--txt);font:inherit;text-align:center;transition:transform .15s,border-color .15s}
+.choice:hover{transform:translateY(-2px);border-color:var(--acc)}
+.choice.last{border-color:var(--acc)}
+.choice .ic{font-size:44px;line-height:1}
+.choice b{display:block;font-size:19px;margin:10px 0 4px}
+.choice span{display:block;color:var(--mut);font-size:13px}
+.choice.res:hover,.choice.res.last{border-color:#8b7bff}
+.tabs{display:flex;gap:8px;margin:0 0 16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tabs button{flex:1;border:0;background:none;color:var(--mut);font:inherit;font-weight:650;padding:11px 8px;border-radius:10px;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff}
+.tabs button.on.res{background:#7b61ff}
+.mode{display:none}.mode.on{display:block}
+#modeRes h2{color:#a99bff}
+@media (prefers-color-scheme: light){#modeRes h2{color:#5b43e0}}
+#modeRes h2 .n{background:#7b61ff}
+#modeRes .big{background:linear-gradient(135deg,rgba(123,97,255,.18),rgba(169,155,255,.06));border-color:rgba(123,97,255,.5)}
+#modeRes .btn{background:#7b61ff}#modeRes .btn.sec{background:var(--chip)}
+#modeRes .pop button.sel{background:#7b61ff}
+
+.search{position:relative}
+.results{position:absolute;z-index:30;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;max-height:300px;overflow:auto;display:none;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.results.open{display:block}
+.results button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:var(--txt);font:inherit;padding:10px 12px;cursor:pointer}
+.results button:last-child{border-bottom:0}
+.results button:hover,.results button.act{background:var(--chip)}
+.results small{color:var(--mut)}
+.results .none{padding:12px;color:var(--mut);font-size:13px}
+.count{font-size:12px;color:var(--mut);margin-top:-6px;margin-bottom:10px}
+.help-btn{background:none;border:0;color:var(--acc2);font:inherit;font-size:12.5px;padding:6px 0 0;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}
+@media (prefers-color-scheme: light){.help-btn{color:var(--acc)}}
+.helpbox{background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:12px;padding:14px 16px;margin:0 0 14px;font-size:14px}
+.helpbox h3{margin:0 0 8px;font-size:15px}
+.helpbox p{margin:8px 0}.helpbox ol{margin:6px 0;padding-left:20px}.helpbox li{margin:4px 0}
+.calcbox{background:var(--card);border:1px dashed var(--acc);border-radius:10px;padding:12px;margin:10px 0}
+.calcres{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.calcres b{font-size:18px;color:var(--ok)}
+.calcres .btn{flex:none;min-width:0;padding:10px 14px}
+.calcres .btn:disabled{opacity:.45;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="chooser" id="chooser">
+  <div class="in">
+    <div class="logo" style="margin:0 auto;width:56px;height:56px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg></div>
+    <h1>Calculadora de Impressão 3D</h1>
+    <p class="sub">Que tipo de impressora você vai usar?</p>
+    <div class="choices">
+      <button class="choice" id="pickFdm" type="button"><div class="ic">🧵</div><b>Filamento (FDM)</b><span>Bambu Lab, Creality, Elegoo Neptune, Prusa, Anycubic Kobra…</span></button>
+      <button class="choice res" id="pickRes" type="button"><div class="ic">🧪</div><b>Resina (SLA / LCD)</b><span>Elegoo Mars/Saturn, Anycubic Photon, Creality Halot, Formlabs…</span></button>
+    </div>
+    <p class="sub" style="margin-top:18px;font-size:12.5px">Dá para trocar depois pelas abas no topo.</p>
+    <button type="button" class="doelink" id="pickDoe">❤️ Gostou? Apoie o projeto</button>
+  </div>
+</div>
+<div class="wrap">
+<header>
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg></div>
+  <div><h1>Calculadora de Impressão 3D</h1><p>Custo real, preço de venda e lucro — grátis</p></div>
+</header>
+
+<nav class="tabs" role="tablist"><button type="button" id="tabFdm" role="tab">🧵 Filamento</button><button type="button" id="tabRes" class="res" role="tab">🧪 Resina</button><button type="button" id="tabDoe" class="doe" role="tab">❤️ Apoiar</button></nav>
+<section class="mode" id="modeFdm">
+<div class="grid">
+<main>
+  <section class="card">
+    <h2><span class="n">1</span> Impressora</h2>
+    <div class="f search">
+      <label for="busca">Buscar impressora</label>
+      <input id="busca" type="search" autocomplete="off" placeholder="Digite o modelo ou a marca (ex.: K1, Neptune 2, Ender)">
+      <div class="results" id="results" role="listbox"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="marca">Marca</label><select id="marca"></select></div>
+      <div class="f"><label for="modelo">Modelo</label><select id="modelo"></select></div>
+    </div>
+    <div class="info">
+      <div class="pill">Consumo médio: <b id="pW">–</b></div>
+      <div class="pill">Vida útil: <b id="pV">–</b></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="valor">Valor da impressora</label><div class="pre"><span>R$</span><input id="valor" inputmode="decimal" value="5000"></div></div>
+      <div class="f"><label for="kwh">Custo da eletricidade (R$/kWh)</label><div class="pre"><span>R$</span><input id="kwh" inputmode="decimal" value="1,40"></div>
+        <button type="button" class="help-btn" id="kwhHelpBtn" aria-expanded="false">ⓘ Onde acho isso na conta de luz?</button></div>
+    </div>
+    <div class="helpbox" id="kwhHelp" hidden>
+      <h3>Como descobrir quanto você paga por kWh</h3>
+      <p><b>Jeito mais fácil (serve pra qualquer pessoa):</b> pegue sua conta de luz (papel, PDF ou app da companhia) e procure 2 números na parte da frente:</p>
+      <ol>
+        <li><b>Total a pagar</b> (R$), o valor da conta.</li>
+        <li><b>Consumo do mês em kWh</b>. Costuma aparecer como “Consumo (kWh)”, “Consumo faturado” ou num gráfico de barras com o histórico dos meses.</li>
+      </ol>
+      <p>Divida um pelo outro: <b>Total ÷ kWh = seu preço por kWh</b>. Já vem com impostos (ICMS, PIS/COFINS) e bandeira tarifária, que é o que você paga de verdade.</p>
+      <div class="calcbox">
+        <div class="row">
+          <div class="f"><label for="hTot">Total a pagar da conta</label><div class="pre"><span>R$</span><input id="hTot" inputmode="decimal" placeholder="ex.: 285,40"></div></div>
+          <div class="f"><label for="hKwh">Consumo do mês</label><div class="pre suf"><input id="hKwh" inputmode="decimal" placeholder="ex.: 230"><span>kWh</span></div></div>
+        </div>
+        <div class="calcres"><span>Seu preço: <b id="hRes">–</b></span><button type="button" class="btn" id="hUse" disabled>Usar este valor</button></div>
+      </div>
+      <p><b>Jeito mais exato (opcional):</b> no quadro de itens da fatura procure a coluna <b>“Preço unitário com tributos (R$)”</b>. Ela costuma ter duas linhas, <b>TUSD</b> (uso da rede) e <b>TE</b> (energia). <b>Some as duas</b>. Se houver linha de <b>bandeira</b> (amarela/vermelha), some o valor por kWh dela também.</p>
+      <p class="hint">💡 O jeito fácil dá um valor um pouco maior porque inclui a taxa de iluminação pública e a cobrança mínima. Para calcular preço de venda isso é até bom (fica do lado seguro). Não tem a conta em mãos? Ela fica no app ou no site da sua distribuidora (Enel, CPFL, Cemig, Light, Neoenergia, Equatorial, Copel, Energisa, Celesc…), em “2ª via” ou “Minhas faturas”.</p>
+    </div>
+    <details>
+      <summary>Ajustar consumo e vida útil manualmente</summary>
+      <div class="row" style="margin-top:8px">
+        <div class="f"><label for="wown">Consumo medido (W)</label><div class="pre suf"><input id="wown" inputmode="decimal" placeholder="automático"><span>W</span></div>
+          <div class="hint">Medido com tomada inteligente ou wattímetro.</div></div>
+        <div class="f"><label for="vown">Vida útil (horas)</label><div class="pre suf"><input id="vown" inputmode="numeric" placeholder="automático"><span>h</span></div></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span> Peça</h2>
+    <div class="row">
+      <div class="f"><label for="fil">Custo do filamento (R$/kg)</label><div class="pre"><span>R$</span><input id="fil" inputmode="decimal" value="130"></div></div>
+      <div class="f"><label for="peso">Peso da peça</label><div class="pre suf"><input id="peso" inputmode="decimal" value="680"><span>g</span></div>
+        <div class="hint">Do fatiador, com suportes.</div></div>
+    </div>
+    <label>Tempo de impressão</label>
+    <div class="row3">
+      <div class="tp" data-id="d" data-max="30" data-val="1" data-unit="dias"></div>
+      <div class="tp" data-id="h" data-max="23" data-val="9" data-unit="horas"></div>
+      <div class="tp" data-id="m" data-max="59" data-val="20" data-unit="minutos"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> Mão de obra, falhas e venda</h2>
+    <label>Seu trabalho na peça (preparar, lixar, pintar, embalar)</label>
+    <div class="row3" style="margin-bottom:12px">
+      <div class="tp" data-id="mh" data-max="23" data-val="0" data-unit="horas"></div>
+      <div class="tp" data-id="mm" data-max="59" data-val="10" data-unit="minutos"></div>
+      <div class="f" style="margin:0"><div class="pre"><span>R$</span><input id="vh" inputmode="decimal" value="25" aria-label="Valor da sua hora"></div><div class="tp"><div class="unit">sua hora</div></div></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="falha">Taxa de falhas</label><div class="pre suf"><input id="falha" inputmode="decimal" value="15"><span>%</span></div></div>
+      <div class="f"><label for="margem">Margem de lucro</label><div class="pre suf"><input id="margem" inputmode="decimal" value="120"><span>%</span></div></div>
+      <div class="f"><label for="extra">Embalagem / outros custos</label><div class="pre"><span>R$</span><input id="extra" inputmode="decimal" value="0"></div></div>
+      <div class="f"><label for="taxa">Taxa marketplace / cartão</label><div class="pre suf"><input id="taxa" inputmode="decimal" value="0"><span>%</span></div>
+        <div class="hint">Shopee, Mercado Livre, maquininha…</div></div>
+    </div>
+  </section>
+</main>
+
+<aside class="side">
+  <section class="card res">
+    <h2>Resultado</h2>
+    <div class="big"><small>Preço de venda sugerido</small><div class="v" id="rPreco">–</div></div>
+    <div class="duo">
+      <div class="mini"><small>Custo total real</small><div class="v" id="rTot">–</div></div>
+      <div class="mini ok"><small>Lucro líquido</small><div class="v" id="rLucro">–</div></div>
+    </div>
+    <div class="bar" id="bar"></div>
+    <div class="legend" id="legend"></div>
+    <div style="margin-top:10px">
+      <div class="line"><span>Material</span><span id="rMat"></span></div>
+      <div class="line"><span>Energia (<span id="rKwh"></span>)</span><span id="rEn"></span></div>
+      <div class="line"><span>Depreciação da impressora</span><span id="rDep"></span></div>
+      <div class="line sub"><span>Custo de produção</span><span id="rProd"></span></div>
+      <div class="line"><span>Mão de obra</span><span id="rMo"></span></div>
+      <div class="line"><span>Falhas</span><span id="rFal"></span></div>
+      <div class="line"><span>Embalagem / outros</span><span id="rExt"></span></div>
+      <div class="line"><span>Taxa do marketplace</span><span id="rTx"></span></div>
+      <div class="line"><span>Tempo total</span><span id="rT"></span></div>
+      <div class="line"><span>Custo por hora</span><span id="rCh"></span></div>
+    </div>
+    <div class="btns">
+      <button class="btn" id="copy">Copiar orçamento</button>
+      <button class="btn sec" id="reset">Restaurar padrão</button>
+    </div>
+    <div id="installBox" class="btns"><button class="btn sec" id="install" style="width:100%">Instalar como app</button></div>
+  </section>
+</aside>
+</div>
+</section>
+
+<section class="mode" id="modeRes">
+<div class="grid">
+<main>
+  <section class="card">
+    <h2><span class="n">1</span> Impressora de resina</h2>
+    <div class="f search">
+      <label for="r_busca">Buscar impressora</label>
+      <input id="r_busca" type="search" autocomplete="off" placeholder="Digite o modelo (ex.: Saturn, Photon, Halot)">
+      <div class="results" id="r_results" role="listbox"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="r_marca">Marca</label><select id="r_marca"></select></div>
+      <div class="f"><label for="r_modelo">Modelo</label><select id="r_modelo"></select></div>
+    </div>
+    <div class="info">
+      <div class="pill">Consumo médio: <b id="r_pW">–</b></div>
+      <div class="pill">Vida útil: <b id="r_pV">–</b></div>
+      <div class="pill">Tela LCD: <b id="r_pT">–</b></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="r_valor">Valor da impressora</label><div class="pre"><span>R$</span><input id="r_valor" inputmode="decimal"></div></div>
+      <div class="f"><label for="r_kwh">Custo da eletricidade (R$/kWh)</label><div class="pre"><span>R$</span><input id="r_kwh" inputmode="decimal"></div>
+        <div class="hint">Conta de luz: total a pagar ÷ consumo do mês (kWh). Mais detalhes na aba Filamento, em “Onde acho isso?”.</div></div>
+    </div>
+    <details>
+      <summary>Ajustar consumo, vida útil e tela manualmente</summary>
+      <div class="row" style="margin-top:8px">
+        <div class="f"><label for="r_wown">Consumo medido (W)</label><div class="pre suf"><input id="r_wown" inputmode="decimal" placeholder="automático"><span>W</span></div></div>
+        <div class="f"><label for="r_vown">Vida útil da máquina (h)</label><div class="pre suf"><input id="r_vown" inputmode="numeric" placeholder="automático"><span>h</span></div></div>
+        <div class="f"><label for="r_town">Preço da tela LCD</label><div class="pre"><span>R$</span><input id="r_town" inputmode="decimal" placeholder="automático"></div></div>
+        <div class="f"><label for="r_thown">Vida da tela (h)</label><div class="pre suf"><input id="r_thown" inputmode="numeric" placeholder="automático"><span>h</span></div></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span> Resina e peça</h2>
+    <div class="row">
+      <div class="f"><label for="r_preco">Preço do frasco de resina</label><div class="pre"><span>R$</span><input id="r_preco" inputmode="decimal"></div></div>
+      <div class="f"><label for="r_tam">Tamanho do frasco</label>
+        <div style="display:grid;grid-template-columns:1fr 92px;gap:8px"><input id="r_tam" inputmode="decimal"><select id="r_und"><option value="g">g</option><option value="ml">ml</option></select></div>
+        <div class="hint">Frasco de 1 kg → 1000 g. Frasco de 1 litro → 1000 ml.</div></div>
+      <div class="f"><label for="r_vol">Volume da peça (do fatiador)</label><div class="pre suf"><input id="r_vol" inputmode="decimal"><span>ml</span></div>
+        <div class="hint">Chitubox, Lychee ou Halot Box mostram em ml (com suportes).</div></div>
+      <div class="f"><label for="r_perda">Perda de resina</label><div class="pre suf"><input id="r_perda" inputmode="decimal"><span>%</span></div>
+        <div class="hint">O que fica no tanque, nos suportes e na lavagem.</div></div>
+    </div>
+    <details>
+      <summary>Densidade da resina (só se o frasco for em gramas)</summary>
+      <div class="f" style="margin-top:8px;max-width:260px"><label for="r_dens">Densidade (g/ml)</label><input id="r_dens" inputmode="decimal"><div class="hint">Resinas comuns: 1,05 a 1,20. Padrão 1,10.</div></div>
+    </details>
+    <label style="margin-top:6px">Tempo de impressão</label>
+    <div class="row3">
+      <div class="tp" data-id="rd" data-max="30" data-val="0" data-unit="dias"></div>
+      <div class="tp" data-id="rh" data-max="23" data-val="4" data-unit="horas"></div>
+      <div class="tp" data-id="rm" data-max="59" data-val="30" data-unit="minutos"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> Desgaste e pós-processamento</h2>
+    <div class="row">
+      <div class="f"><label for="r_fep">Preço do filme FEP/PFA</label><div class="pre"><span>R$</span><input id="r_fep" inputmode="decimal"></div></div>
+      <div class="f"><label for="r_feph">Vida do FEP (horas de impressão)</label><div class="pre suf"><input id="r_feph" inputmode="numeric"><span>h</span></div>
+        <div class="hint">Troca quando risca ou embaça. Média: 150 a 300 h.</div></div>
+      <div class="f"><label for="r_ipa">Álcool isopropílico / limpeza</label><div class="pre"><span>R$</span><input id="r_ipa" inputmode="decimal"></div>
+        <div class="hint">Por impressão: álcool, papel, luvas, cura UV.</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span> Mão de obra, falhas e venda</h2>
+    <label>Seu trabalho na peça (lavar, curar, tirar suporte, lixar, pintar)</label>
+    <div class="row3" style="margin-bottom:12px">
+      <div class="tp" data-id="rmh" data-max="23" data-val="0" data-unit="horas"></div>
+      <div class="tp" data-id="rmm" data-max="59" data-val="20" data-unit="minutos"></div>
+      <div class="f" style="margin:0"><div class="pre"><span>R$</span><input id="r_vh" inputmode="decimal" aria-label="Valor da sua hora"></div><div class="tp"><div class="unit">sua hora</div></div></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="r_falha">Taxa de falhas</label><div class="pre suf"><input id="r_falha" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label for="r_margem">Margem de lucro</label><div class="pre suf"><input id="r_margem" inputmode="decimal"><span>%</span></div></div>
+      <div class="f"><label for="r_extra">Embalagem / outros custos</label><div class="pre"><span>R$</span><input id="r_extra" inputmode="decimal"></div></div>
+      <div class="f"><label for="r_taxa">Taxa marketplace / cartão</label><div class="pre suf"><input id="r_taxa" inputmode="decimal"><span>%</span></div></div>
+    </div>
+  </section>
+</main>
+
+<aside class="side">
+  <section class="card res">
+    <h2>Resultado – resina</h2>
+    <div class="big"><small>Preço de venda sugerido</small><div class="v" id="r_rPreco">–</div></div>
+    <div class="duo">
+      <div class="mini"><small>Custo total real</small><div class="v" id="r_rTot">–</div></div>
+      <div class="mini ok"><small>Lucro líquido</small><div class="v" id="r_rLucro">–</div></div>
+    </div>
+    <div class="bar" id="r_bar"></div>
+    <div class="legend" id="r_legend"></div>
+    <div style="margin-top:10px">
+      <div class="line"><span>Resina (<span id="r_rMl"></span>)</span><span id="r_rRes"></span></div>
+      <div class="line"><span>Energia</span><span id="r_rEn"></span></div>
+      <div class="line"><span>Depreciação da impressora</span><span id="r_rDep"></span></div>
+      <div class="line"><span>Desgaste da tela LCD</span><span id="r_rTela"></span></div>
+      <div class="line"><span>Desgaste do FEP</span><span id="r_rFep"></span></div>
+      <div class="line"><span>Álcool / limpeza</span><span id="r_rIpa"></span></div>
+      <div class="line sub"><span>Custo de produção</span><span id="r_rProd"></span></div>
+      <div class="line"><span>Mão de obra</span><span id="r_rMo"></span></div>
+      <div class="line"><span>Falhas</span><span id="r_rFal"></span></div>
+      <div class="line"><span>Embalagem / outros</span><span id="r_rExt"></span></div>
+      <div class="line"><span>Taxa do marketplace</span><span id="r_rTx"></span></div>
+      <div class="line"><span>Tempo total</span><span id="r_rT"></span></div>
+    </div>
+    <div class="btns">
+      <button class="btn" id="r_copy">Copiar orçamento</button>
+      <button class="btn sec" id="r_reset">Restaurar padrão</button>
+    </div>
+  </section>
+</aside>
+</div>
+</section>
+
+<section class="mode" id="modeDoe">
+  <section class="card">
+    <div class="heart">❤️</div>
+    <h2>Apoie este projeto</h2>
+    <p>A calculadora é <b>gratuita</b> e vai continuar assim. Se ela te ajudou a precificar suas peças e você quiser contribuir com qualquer valor, fico muito agradecido!</p>
+    <div class="donor">
+      <div class="lbl">Nome</div>
+      <div class="val">Marcos Pablo da Silva Sousa</div>
+    </div>
+    <div class="donor">
+      <div class="lbl">Doação via <span class="pix">PIX</span> <span style="text-transform:none">ou</span> <span class="picpay">PicPay</span></div>
+      <div class="rowc" style="margin-top:8px">
+        <div><div class="val" id="doePhone">(86) 98847-7452</div><div class="hint" style="margin-top:2px">Chave PIX: celular • também é o número do PicPay</div></div>
+        <button class="btn" type="button" id="copyPhone">Copiar chave PIX</button>
+      </div>
+    </div>
+    <div class="donor">
+      <div class="lbl">Como doar por PIX (qualquer banco)</div>
+      <ol class="steps">
+        <li>Abra o app do seu banco e vá em <b>PIX → Pagar / Transferir</b>.</li>
+        <li>Escolha a chave do tipo <b>Celular</b> e cole o número <b>(86) 98847-7452</b>.</li>
+        <li>Confira o nome <b>Marcos Pablo da Silva Sousa</b>, digite o valor e confirme.</li>
+      </ol>
+      <div class="lbl" style="margin-top:14px">Tem PicPay?</div>
+      <ol class="steps">
+        <li>No app <b>PicPay</b>, toque em <b>Pagar</b> e busque pelo mesmo número.</li>
+      </ol>
+    </div>
+    <p style="font-size:13px;margin-top:14px">Obrigado por apoiar! 🙏 Compartilhe a calculadora com outros makers também.</p>
+  </section>
+</section>
+
+<footer>
+  Consumo médio, vida útil e vida da tela são <b>estimativas</b> por tipo de máquina (consumo real imprimindo, não a potência da etiqueta).<br>
+  Para precisão total, meça com uma tomada inteligente e digite em “Ajustar manualmente”. Seus valores ficam salvos neste aparelho.
+</footer>
+</div>
+<div class="toast" id="toast">Copiado!</div>
+
+<script>
+const PRINTERS = [{"marca": "3D Cloner (Brasil)", "modelo": "ST", "w": 120, "vida": 8000}, {"marca": "3D Cloner (Brasil)", "modelo": "LAB", "w": 120, "vida": 8000}, {"marca": "3D Cloner (Brasil)", "modelo": "Plus G3", "w": 230, "vida": 8000}, {"marca": "Alfawise", "modelo": "U20", "w": 190, "vida": 4000}, {"marca": "Alfawise", "modelo": "U30", "w": 110, "vida": 4000}, {"marca": "Anet", "modelo": "A8", "w": 120, "vida": 4000}, {"marca": "Anet", "modelo": "A8 Plus", "w": 170, "vida": 4000}, {"marca": "Anet", "modelo": "A6", "w": 120, "vida": 4000}, {"marca": "Anet", "modelo": "ET4", "w": 110, "vida": 4000}, {"marca": "Anet", "modelo": "ET4 Pro", "w": 110, "vida": 4000}, {"marca": "Anet", "modelo": "ET5 Pro", "w": 190, "vida": 4000}, {"marca": "Anker (AnkerMake)", "modelo": "M5", "w": 120, "vida": 6000}, {"marca": "Anker (AnkerMake)", "modelo": "M5C", "w": 110, "vida": 6000}, {"marca": "Anycubic", "modelo": "i3 Mega", "w": 110, "vida": 5000}, {"marca": "Anycubic", "modelo": "i3 Mega S", "w": 110, "vida": 5000}, {"marca": "Anycubic", "modelo": "Mega Zero", "w": 90, "vida": 4000}, {"marca": "Anycubic", "modelo": "Mega Zero 2.0", "w": 90, "vida": 4000}, {"marca": "Anycubic", "modelo": "Mega Pro", "w": 120, "vida": 5000}, {"marca": "Anycubic", "modelo": "Mega X", "w": 180, "vida": 5000}, {"marca": "Anycubic", "modelo": "Chiron", "w": 300, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kossel (delta)", "w": 100, "vida": 4000}, {"marca": "Anycubic", "modelo": "Predator (delta)", "w": 200, "vida": 5000}, {"marca": "Anycubic", "modelo": "Vyper", "w": 110, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kobra", "w": 110, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kobra Go", "w": 100, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kobra Neo", "w": 100, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kobra Plus", "w": 180, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kobra Max", "w": 300, "vida": 5000}, {"marca": "Anycubic", "modelo": "Kobra 2", "w": 110, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 2 Neo", "w": 100, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 2 Pro", "w": 110, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 2 Plus", "w": 200, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 2 Max", "w": 270, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 3 / Kobra 3 Combo", "w": 120, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 3 Max", "w": 270, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra 4 / Kobra 4 Combo", "w": 120, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra X", "w": 120, "vida": 6000}, {"marca": "Anycubic", "modelo": "Kobra S1 / S1 Combo", "w": 170, "vida": 8000}, {"marca": "Anycubic", "modelo": "Kobra S1 Max", "w": 280, "vida": 10000}, {"marca": "Artillery", "modelo": "Genius", "w": 110, "vida": 5000}, {"marca": "Artillery", "modelo": "Genius Pro", "w": 110, "vida": 6000}, {"marca": "Artillery", "modelo": "Hornet", "w": 100, "vida": 5000}, {"marca": "Artillery", "modelo": "Sidewinder X1", "w": 180, "vida": 5000}, {"marca": "Artillery", "modelo": "Sidewinder X2", "w": 180, "vida": 6000}, {"marca": "Artillery", "modelo": "Sidewinder X3 Pro", "w": 120, "vida": 6000}, {"marca": "Artillery", "modelo": "Sidewinder X3 Plus", "w": 190, "vida": 6000}, {"marca": "Artillery", "modelo": "Sidewinder X4 Pro", "w": 120, "vida": 6000}, {"marca": "Artillery", "modelo": "Sidewinder X4 Pro S1", "w": 120, "vida": 6000}, {"marca": "Artillery", "modelo": "Sidewinder X4 Plus", "w": 200, "vida": 6000}, {"marca": "Artillery", "modelo": "Sidewinder X4 Plus S1", "w": 200, "vida": 6000}, {"marca": "Artillery", "modelo": "M1 Pro", "w": 170, "vida": 8000}, {"marca": "Artillery", "modelo": "M1 Pro S1", "w": 170, "vida": 8000}, {"marca": "Bambu Lab", "modelo": "A1 mini", "w": 70, "vida": 5000}, {"marca": "Bambu Lab", "modelo": "A1", "w": 110, "vida": 6000}, {"marca": "Bambu Lab", "modelo": "A2L", "w": 180, "vida": 6000}, {"marca": "Bambu Lab", "modelo": "P1P", "w": 140, "vida": 8000}, {"marca": "Bambu Lab", "modelo": "P1S", "w": 160, "vida": 8000}, {"marca": "Bambu Lab", "modelo": "P2S", "w": 170, "vida": 8000}, {"marca": "Bambu Lab", "modelo": "X1", "w": 200, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "X1 Carbon", "w": 210, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "X1E", "w": 240, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "X2D", "w": 220, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "H2S", "w": 280, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "H2D", "w": 290, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "H2D Pro", "w": 300, "vida": 15000}, {"marca": "Bambu Lab", "modelo": "H2C", "w": 290, "vida": 10000}, {"marca": "Bambu Lab", "modelo": "H3C (9 cabeçotes)", "w": 240, "vida": 12000}, {"marca": "BCN3D", "modelo": "Sigma", "w": 150, "vida": 10000}, {"marca": "BCN3D", "modelo": "Sigma R19", "w": 160, "vida": 10000}, {"marca": "BCN3D", "modelo": "Epsilon W27", "w": 300, "vida": 15000}, {"marca": "BCN3D", "modelo": "Epsilon W50", "w": 400, "vida": 15000}, {"marca": "BCN3D", "modelo": "Omega I60", "w": 900, "vida": 20000}, {"marca": "Biqu", "modelo": "B1", "w": 110, "vida": 5000}, {"marca": "Biqu", "modelo": "BX", "w": 180, "vida": 5000}, {"marca": "Biqu", "modelo": "Hurakan", "w": 110, "vida": 5000}, {"marca": "Cliever (Brasil)", "modelo": "CL1", "w": 130, "vida": 8000}, {"marca": "Cliever (Brasil)", "modelo": "CL2 Pro", "w": 150, "vida": 8000}, {"marca": "Creality", "modelo": "SPARKX i7 Nano", "w": 80, "vida": 5000}, {"marca": "Creality", "modelo": "SPARKX i7", "w": 120, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 2", "w": 70, "vida": 4000}, {"marca": "Creality", "modelo": "Ender 2 Pro", "w": 70, "vida": 4000}, {"marca": "Creality", "modelo": "Ender 3", "w": 100, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 Pro", "w": 100, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 V2", "w": 105, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 V2 Neo", "w": 105, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 Neo", "w": 100, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 Max", "w": 170, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 Max Neo", "w": 170, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 3 S1", "w": 110, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 S1 Pro", "w": 110, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 S1 Plus", "w": 180, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 V3 SE", "w": 100, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 V3 KE", "w": 110, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 V3", "w": 120, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 V3 Plus", "w": 200, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 3 V4 / V4 Combo", "w": 120, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 5", "w": 110, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 5 Pro", "w": 110, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 5 Plus", "w": 220, "vida": 5000}, {"marca": "Creality", "modelo": "Ender 5 S1", "w": 130, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 5 Max", "w": 280, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 6", "w": 140, "vida": 6000}, {"marca": "Creality", "modelo": "Ender 7", "w": 130, "vida": 6000}, {"marca": "Creality", "modelo": "CR-10 Mini", "w": 130, "vida": 5000}, {"marca": "Creality", "modelo": "CR-10 / CR-10S", "w": 180, "vida": 5000}, {"marca": "Creality", "modelo": "CR-10 V2", "w": 180, "vida": 5000}, {"marca": "Creality", "modelo": "CR-10 V3", "w": 180, "vida": 5000}, {"marca": "Creality", "modelo": "CR-10 S4", "w": 270, "vida": 5000}, {"marca": "Creality", "modelo": "CR-10 S5", "w": 350, "vida": 5000}, {"marca": "Creality", "modelo": "CR-10 Max", "w": 400, "vida": 6000}, {"marca": "Creality", "modelo": "CR-10 Smart", "w": 180, "vida": 6000}, {"marca": "Creality", "modelo": "CR-10 Smart Pro", "w": 180, "vida": 6000}, {"marca": "Creality", "modelo": "CR-10 SE", "w": 180, "vida": 6000}, {"marca": "Creality", "modelo": "CR-6 SE", "w": 110, "vida": 5000}, {"marca": "Creality", "modelo": "CR-6 Max", "w": 200, "vida": 5000}, {"marca": "Creality", "modelo": "CR-5 Pro", "w": 180, "vida": 6000}, {"marca": "Creality", "modelo": "CR-20 / CR-20 Pro", "w": 100, "vida": 5000}, {"marca": "Creality", "modelo": "CR-30 PrintMill (esteira)", "w": 200, "vida": 6000}, {"marca": "Creality", "modelo": "CR-M4", "w": 350, "vida": 6000}, {"marca": "Creality", "modelo": "CR-200B", "w": 120, "vida": 5000}, {"marca": "Creality", "modelo": "Sermoon V1", "w": 110, "vida": 5000}, {"marca": "Creality", "modelo": "Sermoon D1", "w": 150, "vida": 6000}, {"marca": "Creality", "modelo": "Hi / Hi Combo", "w": 120, "vida": 6000}, {"marca": "Creality", "modelo": "K1 SE", "w": 140, "vida": 8000}, {"marca": "Creality", "modelo": "K1", "w": 160, "vida": 8000}, {"marca": "Creality", "modelo": "K1C", "w": 160, "vida": 8000}, {"marca": "Creality", "modelo": "K1 Max", "w": 230, "vida": 8000}, {"marca": "Creality", "modelo": "K2 SE", "w": 160, "vida": 8000}, {"marca": "Creality", "modelo": "K2 / K2 Combo", "w": 170, "vida": 8000}, {"marca": "Creality", "modelo": "K2 Pro", "w": 220, "vida": 10000}, {"marca": "Creality", "modelo": "K2 Plus", "w": 300, "vida": 10000}, {"marca": "CreatBot", "modelo": "F160", "w": 200, "vida": 10000}, {"marca": "CreatBot", "modelo": "DX Plus", "w": 250, "vida": 10000}, {"marca": "CreatBot", "modelo": "D600 Pro", "w": 600, "vida": 15000}, {"marca": "Dremel", "modelo": "3D20", "w": 90, "vida": 6000}, {"marca": "Dremel", "modelo": "3D40", "w": 110, "vida": 6000}, {"marca": "Dremel", "modelo": "3D45", "w": 130, "vida": 8000}, {"marca": "Elegoo", "modelo": "Neptune", "w": 100, "vida": 4000}, {"marca": "Elegoo", "modelo": "Neptune X", "w": 100, "vida": 4000}, {"marca": "Elegoo", "modelo": "Neptune 2", "w": 100, "vida": 5000}, {"marca": "Elegoo", "modelo": "Neptune 2S", "w": 100, "vida": 5000}, {"marca": "Elegoo", "modelo": "Neptune 2D (dois bicos)", "w": 110, "vida": 5000}, {"marca": "Elegoo", "modelo": "Neptune 3", "w": 100, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 3 Pro", "w": 100, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 3 Plus", "w": 180, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 3 Max", "w": 260, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 4", "w": 110, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 4 Pro", "w": 110, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 4 Plus", "w": 200, "vida": 6000}, {"marca": "Elegoo", "modelo": "Neptune 4 Max", "w": 280, "vida": 6000}, {"marca": "Elegoo", "modelo": "Centauri 2 (aberta)", "w": 130, "vida": 8000}, {"marca": "Elegoo", "modelo": "Centauri Carbon", "w": 150, "vida": 8000}, {"marca": "Elegoo", "modelo": "Centauri Carbon 2 / Combo", "w": 160, "vida": 8000}, {"marca": "Elegoo", "modelo": "OrangeStorm Giga", "w": 450, "vida": 10000}, {"marca": "Flashforge", "modelo": "Finder", "w": 60, "vida": 4000}, {"marca": "Flashforge", "modelo": "Finder 3", "w": 70, "vida": 5000}, {"marca": "Flashforge", "modelo": "Dreamer", "w": 140, "vida": 5000}, {"marca": "Flashforge", "modelo": "Adventurer 3", "w": 80, "vida": 5000}, {"marca": "Flashforge", "modelo": "Adventurer 3 Pro", "w": 80, "vida": 5000}, {"marca": "Flashforge", "modelo": "Adventurer 4", "w": 140, "vida": 6000}, {"marca": "Flashforge", "modelo": "Adventurer 4 Pro", "w": 150, "vida": 6000}, {"marca": "Flashforge", "modelo": "Adventurer 5M", "w": 120, "vida": 8000}, {"marca": "Flashforge", "modelo": "Adventurer 5M Pro", "w": 150, "vida": 8000}, {"marca": "Flashforge", "modelo": "AD5X", "w": 120, "vida": 6000}, {"marca": "Flashforge", "modelo": "Creator Pro", "w": 150, "vida": 5000}, {"marca": "Flashforge", "modelo": "Creator Pro 2 (IDEX)", "w": 160, "vida": 6000}, {"marca": "Flashforge", "modelo": "Creator 3 (IDEX)", "w": 220, "vida": 8000}, {"marca": "Flashforge", "modelo": "Creator 3 Pro (IDEX)", "w": 230, "vida": 8000}, {"marca": "Flashforge", "modelo": "Creator 4", "w": 350, "vida": 12000}, {"marca": "Flashforge", "modelo": "Creator 5", "w": 130, "vida": 8000}, {"marca": "Flashforge", "modelo": "Creator 5 Pro", "w": 220, "vida": 10000}, {"marca": "Flashforge", "modelo": "Guider II", "w": 220, "vida": 8000}, {"marca": "Flashforge", "modelo": "Guider IIs", "w": 230, "vida": 8000}, {"marca": "Flashforge", "modelo": "Guider 3", "w": 300, "vida": 12000}, {"marca": "Flashforge", "modelo": "Guider 3 Plus", "w": 320, "vida": 12000}, {"marca": "Flashforge", "modelo": "Guider 3 Ultra", "w": 350, "vida": 12000}, {"marca": "FLSUN (delta)", "modelo": "Q5", "w": 90, "vida": 5000}, {"marca": "FLSUN (delta)", "modelo": "QQ-S Pro", "w": 120, "vida": 5000}, {"marca": "FLSUN (delta)", "modelo": "Super Racer (SR)", "w": 140, "vida": 5000}, {"marca": "FLSUN (delta)", "modelo": "V400", "w": 180, "vida": 6000}, {"marca": "FLSUN (delta)", "modelo": "T1", "w": 150, "vida": 6000}, {"marca": "FLSUN (delta)", "modelo": "T1 Pro", "w": 160, "vida": 6000}, {"marca": "FLSUN (delta)", "modelo": "T1 Max", "w": 220, "vida": 6000}, {"marca": "FLSUN (delta)", "modelo": "S1", "w": 200, "vida": 6000}, {"marca": "FLSUN (delta)", "modelo": "S1 Pro", "w": 220, "vida": 6000}, {"marca": "Geeetech", "modelo": "A10", "w": 110, "vida": 4000}, {"marca": "Geeetech", "modelo": "A10 Pro", "w": 110, "vida": 4000}, {"marca": "Geeetech", "modelo": "A10M (dois bicos)", "w": 120, "vida": 4000}, {"marca": "Geeetech", "modelo": "A20", "w": 150, "vida": 4000}, {"marca": "Geeetech", "modelo": "A20M (dois bicos)", "w": 160, "vida": 4000}, {"marca": "Geeetech", "modelo": "A30", "w": 190, "vida": 4000}, {"marca": "Geeetech", "modelo": "A30 Pro", "w": 190, "vida": 4000}, {"marca": "Geeetech", "modelo": "A30M (dois bicos)", "w": 200, "vida": 4000}, {"marca": "Geeetech", "modelo": "Mizar", "w": 110, "vida": 4000}, {"marca": "Geeetech", "modelo": "Mizar S", "w": 110, "vida": 4000}, {"marca": "Geeetech", "modelo": "Mizar Max", "w": 190, "vida": 4000}, {"marca": "Geeetech", "modelo": "Thunder", "w": 140, "vida": 4000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A1", "w": 150, "vida": 8000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A1v2", "w": 150, "vida": 8000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A2", "w": 200, "vida": 8000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A2v2", "w": 200, "vida": 8000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A3", "w": 220, "vida": 8000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A3v2", "w": 220, "vida": 8000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core A3v3", "w": 220, "vida": 10000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core M4", "w": 260, "vida": 10000}, {"marca": "GTMax3D (Brasil)", "modelo": "Core GT4", "w": 350, "vida": 15000}, {"marca": "JGAurora", "modelo": "A5S", "w": 190, "vida": 4000}, {"marca": "JGAurora", "modelo": "Magic", "w": 110, "vida": 4000}, {"marca": "Kingroon", "modelo": "KP3", "w": 70, "vida": 4000}, {"marca": "Kingroon", "modelo": "KP3S", "w": 70, "vida": 4000}, {"marca": "Kingroon", "modelo": "KP3S Pro", "w": 80, "vida": 4000}, {"marca": "Kingroon", "modelo": "KP3S Pro V2", "w": 80, "vida": 4000}, {"marca": "Kingroon", "modelo": "KP3S 3.0", "w": 80, "vida": 4000}, {"marca": "Kingroon", "modelo": "KP5L", "w": 170, "vida": 4000}, {"marca": "Kingroon", "modelo": "KLP1", "w": 140, "vida": 5000}, {"marca": "Longer", "modelo": "LK1", "w": 180, "vida": 4000}, {"marca": "Longer", "modelo": "LK4", "w": 110, "vida": 4000}, {"marca": "Longer", "modelo": "LK4 Pro", "w": 110, "vida": 4000}, {"marca": "Longer", "modelo": "LK5 Pro", "w": 180, "vida": 4000}, {"marca": "Longer", "modelo": "LK10", "w": 110, "vida": 4000}, {"marca": "Longer", "modelo": "LK10 Plus", "w": 190, "vida": 4000}, {"marca": "LulzBot", "modelo": "Mini", "w": 110, "vida": 10000}, {"marca": "LulzBot", "modelo": "Mini 2", "w": 110, "vida": 10000}, {"marca": "LulzBot", "modelo": "TAZ 6", "w": 200, "vida": 10000}, {"marca": "LulzBot", "modelo": "TAZ Workhorse", "w": 220, "vida": 10000}, {"marca": "LulzBot", "modelo": "TAZ Pro", "w": 230, "vida": 12000}, {"marca": "LulzBot", "modelo": "TAZ SideKick 289", "w": 110, "vida": 10000}, {"marca": "LulzBot", "modelo": "TAZ SideKick 747", "w": 200, "vida": 10000}, {"marca": "MakerBot", "modelo": "Replicator 2", "w": 120, "vida": 8000}, {"marca": "MakerBot", "modelo": "Replicator+", "w": 120, "vida": 8000}, {"marca": "MakerBot", "modelo": "Replicator Mini+", "w": 70, "vida": 6000}, {"marca": "MakerBot", "modelo": "Replicator Z18", "w": 250, "vida": 8000}, {"marca": "MakerBot", "modelo": "Method", "w": 200, "vida": 12000}, {"marca": "MakerBot", "modelo": "Method X", "w": 220, "vida": 12000}, {"marca": "MakerBot", "modelo": "Method XL", "w": 300, "vida": 15000}, {"marca": "MakerBot", "modelo": "Sketch", "w": 110, "vida": 6000}, {"marca": "MakerBot", "modelo": "Sketch Large", "w": 150, "vida": 6000}, {"marca": "MakerBot", "modelo": "Sketch Sprint", "w": 150, "vida": 6000}, {"marca": "Metamáquina (Brasil)", "modelo": "Metamáquina 2", "w": 100, "vida": 5000}, {"marca": "Mingda", "modelo": "Magician X", "w": 110, "vida": 5000}, {"marca": "Mingda", "modelo": "Magician Pro", "w": 190, "vida": 5000}, {"marca": "Mingda", "modelo": "Magician Max", "w": 280, "vida": 5000}, {"marca": "Mingda", "modelo": "Rock 3", "w": 190, "vida": 5000}, {"marca": "Monoprice", "modelo": "Select Mini V2", "w": 60, "vida": 4000}, {"marca": "Monoprice", "modelo": "Maker Select V2", "w": 110, "vida": 4000}, {"marca": "Monoprice", "modelo": "Maker Select Plus", "w": 110, "vida": 4000}, {"marca": "Monoprice", "modelo": "Mini Delta", "w": 60, "vida": 4000}, {"marca": "Monoprice", "modelo": "Voxel", "w": 120, "vida": 4000}, {"marca": "Prusa", "modelo": "MINI", "w": 70, "vida": 8000}, {"marca": "Prusa", "modelo": "MINI+", "w": 70, "vida": 8000}, {"marca": "Prusa", "modelo": "i3 MK2S", "w": 100, "vida": 10000}, {"marca": "Prusa", "modelo": "i3 MK2.5S", "w": 100, "vida": 10000}, {"marca": "Prusa", "modelo": "i3 MK3", "w": 100, "vida": 10000}, {"marca": "Prusa", "modelo": "i3 MK3S", "w": 100, "vida": 10000}, {"marca": "Prusa", "modelo": "i3 MK3S+", "w": 100, "vida": 10000}, {"marca": "Prusa", "modelo": "MK3.5 / MK3.5S", "w": 105, "vida": 10000}, {"marca": "Prusa", "modelo": "MK3.9 / MK3.9S", "w": 110, "vida": 10000}, {"marca": "Prusa", "modelo": "MK4", "w": 110, "vida": 10000}, {"marca": "Prusa", "modelo": "MK4S", "w": 110, "vida": 10000}, {"marca": "Prusa", "modelo": "Core One", "w": 170, "vida": 12000}, {"marca": "Prusa", "modelo": "Core One+", "w": 170, "vida": 12000}, {"marca": "Prusa", "modelo": "Core One+ (Gen 2)", "w": 170, "vida": 12000}, {"marca": "Prusa", "modelo": "Core One+ INDX (troca de ferramentas)", "w": 190, "vida": 12000}, {"marca": "Prusa", "modelo": "Core One L", "w": 230, "vida": 12000}, {"marca": "Prusa", "modelo": "Core One L+", "w": 230, "vida": 12000}, {"marca": "Prusa", "modelo": "Core One L+ INDX (troca de ferramentas)", "w": 250, "vida": 12000}, {"marca": "Prusa", "modelo": "XL (1 cabeçote)", "w": 250, "vida": 15000}, {"marca": "Prusa", "modelo": "XL (2 a 5 cabeçotes)", "w": 300, "vida": 15000}, {"marca": "Prusa", "modelo": "XL+", "w": 300, "vida": 15000}, {"marca": "Prusa", "modelo": "Pro HT90 (alta temperatura)", "w": 400, "vida": 15000}, {"marca": "QIDI", "modelo": "X-One 2", "w": 80, "vida": 6000}, {"marca": "QIDI", "modelo": "X-Pro", "w": 140, "vida": 6000}, {"marca": "QIDI", "modelo": "X-Plus", "w": 160, "vida": 8000}, {"marca": "QIDI", "modelo": "X-Max", "w": 220, "vida": 8000}, {"marca": "QIDI", "modelo": "X-CF Pro", "w": 220, "vida": 8000}, {"marca": "QIDI", "modelo": "i-Fast", "w": 300, "vida": 8000}, {"marca": "QIDI", "modelo": "X-Smart 3", "w": 150, "vida": 8000}, {"marca": "QIDI", "modelo": "X-Plus 3", "w": 200, "vida": 10000}, {"marca": "QIDI", "modelo": "X-Max 3", "w": 280, "vida": 10000}, {"marca": "QIDI", "modelo": "Q1 Pro", "w": 180, "vida": 10000}, {"marca": "QIDI", "modelo": "Plus4", "w": 230, "vida": 10000}, {"marca": "QIDI", "modelo": "Plus5", "w": 230, "vida": 10000}, {"marca": "QIDI", "modelo": "Q2", "w": 200, "vida": 10000}, {"marca": "QIDI", "modelo": "Q2C", "w": 170, "vida": 8000}, {"marca": "QIDI", "modelo": "Max4", "w": 290, "vida": 10000}, {"marca": "Raise3D", "modelo": "N1", "w": 150, "vida": 12000}, {"marca": "Raise3D", "modelo": "N2", "w": 170, "vida": 12000}, {"marca": "Raise3D", "modelo": "N2 Plus", "w": 250, "vida": 12000}, {"marca": "Raise3D", "modelo": "Pro2", "w": 250, "vida": 15000}, {"marca": "Raise3D", "modelo": "Pro2 Plus", "w": 320, "vida": 15000}, {"marca": "Raise3D", "modelo": "E2", "w": 200, "vida": 15000}, {"marca": "Raise3D", "modelo": "E2CF", "w": 200, "vida": 15000}, {"marca": "Raise3D", "modelo": "Pro3", "w": 300, "vida": 20000}, {"marca": "Raise3D", "modelo": "Pro3 Plus", "w": 380, "vida": 20000}, {"marca": "Rat Rig", "modelo": "V-Minion", "w": 100, "vida": 8000}, {"marca": "Rat Rig", "modelo": "V-Core 3", "w": 250, "vida": 10000}, {"marca": "Rat Rig", "modelo": "V-Core 4", "w": 260, "vida": 10000}, {"marca": "Sethi3D (Brasil)", "modelo": "AiP", "w": 110, "vida": 8000}, {"marca": "Sethi3D (Brasil)", "modelo": "S3", "w": 120, "vida": 8000}, {"marca": "Sethi3D (Brasil)", "modelo": "S3X", "w": 180, "vida": 10000}, {"marca": "Sethi3D (Brasil)", "modelo": "S4X", "w": 300, "vida": 8000}, {"marca": "Sethi3D (Brasil)", "modelo": "BB", "w": 300, "vida": 8000}, {"marca": "Snapmaker", "modelo": "Original", "w": 70, "vida": 5000}, {"marca": "Snapmaker", "modelo": "2.0 A150", "w": 110, "vida": 8000}, {"marca": "Snapmaker", "modelo": "2.0 A250", "w": 160, "vida": 8000}, {"marca": "Snapmaker", "modelo": "2.0 A350", "w": 200, "vida": 8000}, {"marca": "Snapmaker", "modelo": "J1", "w": 180, "vida": 8000}, {"marca": "Snapmaker", "modelo": "J1s (IDEX)", "w": 180, "vida": 8000}, {"marca": "Snapmaker", "modelo": "Artisan", "w": 300, "vida": 10000}, {"marca": "Snapmaker", "modelo": "U1 (4 cabeçotes)", "w": 200, "vida": 8000}, {"marca": "Sovol", "modelo": "SV01", "w": 110, "vida": 5000}, {"marca": "Sovol", "modelo": "SV01 Pro", "w": 110, "vida": 5000}, {"marca": "Sovol", "modelo": "SV02 (dois bicos)", "w": 120, "vida": 5000}, {"marca": "Sovol", "modelo": "SV03", "w": 200, "vida": 5000}, {"marca": "Sovol", "modelo": "SV04 (IDEX)", "w": 200, "vida": 5000}, {"marca": "Sovol", "modelo": "SV05", "w": 110, "vida": 6000}, {"marca": "Sovol", "modelo": "SV06", "w": 100, "vida": 6000}, {"marca": "Sovol", "modelo": "SV06 ACE", "w": 110, "vida": 6000}, {"marca": "Sovol", "modelo": "SV06 Plus", "w": 180, "vida": 6000}, {"marca": "Sovol", "modelo": "SV06 Plus ACE", "w": 190, "vida": 6000}, {"marca": "Sovol", "modelo": "SV07", "w": 110, "vida": 6000}, {"marca": "Sovol", "modelo": "SV07 Plus", "w": 180, "vida": 6000}, {"marca": "Sovol", "modelo": "SV08", "w": 180, "vida": 8000}, {"marca": "Sovol", "modelo": "SV08 Max", "w": 300, "vida": 6000}, {"marca": "Sovol", "modelo": "SV08 Max (câmara aquecida)", "w": 350, "vida": 10000}, {"marca": "Sovol", "modelo": "Zero", "w": 90, "vida": 6000}, {"marca": "Tevo", "modelo": "Tarantula", "w": 110, "vida": 4000}, {"marca": "Tevo", "modelo": "Tornado", "w": 200, "vida": 4000}, {"marca": "Tronxy", "modelo": "X5SA", "w": 200, "vida": 4000}, {"marca": "Tronxy", "modelo": "X5SA Pro", "w": 200, "vida": 4000}, {"marca": "Tronxy", "modelo": "X5SA-400", "w": 300, "vida": 4000}, {"marca": "Tronxy", "modelo": "XY-2 Pro", "w": 110, "vida": 4000}, {"marca": "Tronxy", "modelo": "XY-3 Pro", "w": 180, "vida": 4000}, {"marca": "Tronxy", "modelo": "VEHO 600", "w": 450, "vida": 4000}, {"marca": "Tronxy", "modelo": "VEHO 800", "w": 600, "vida": 4000}, {"marca": "Two Trees", "modelo": "Bluer", "w": 100, "vida": 4000}, {"marca": "Two Trees", "modelo": "Bluer Plus", "w": 180, "vida": 4000}, {"marca": "Two Trees", "modelo": "Sapphire Pro", "w": 110, "vida": 4000}, {"marca": "Two Trees", "modelo": "Sapphire Plus", "w": 180, "vida": 4000}, {"marca": "Two Trees", "modelo": "SP-3", "w": 110, "vida": 4000}, {"marca": "Two Trees", "modelo": "SP-5", "w": 200, "vida": 4000}, {"marca": "Two Trees", "modelo": "SK1", "w": 160, "vida": 6000}, {"marca": "UltiMaker", "modelo": "Ultimaker Original", "w": 100, "vida": 8000}, {"marca": "UltiMaker", "modelo": "Ultimaker 2", "w": 120, "vida": 12000}, {"marca": "UltiMaker", "modelo": "Ultimaker 2+", "w": 120, "vida": 12000}, {"marca": "UltiMaker", "modelo": "Ultimaker 2+ Connect", "w": 120, "vida": 12000}, {"marca": "UltiMaker", "modelo": "Ultimaker 3", "w": 150, "vida": 15000}, {"marca": "UltiMaker", "modelo": "Ultimaker 3 Extended", "w": 160, "vida": 15000}, {"marca": "UltiMaker", "modelo": "S3", "w": 200, "vida": 20000}, {"marca": "UltiMaker", "modelo": "S5", "w": 230, "vida": 20000}, {"marca": "UltiMaker", "modelo": "S6", "w": 240, "vida": 20000}, {"marca": "UltiMaker", "modelo": "S7", "w": 250, "vida": 20000}, {"marca": "UltiMaker", "modelo": "S8", "w": 260, "vida": 20000}, {"marca": "UltiMaker", "modelo": "Factor 4", "w": 350, "vida": 20000}, {"marca": "Voolt3D (Brasil)", "modelo": "Gi3", "w": 120, "vida": 8000}, {"marca": "Voron (montagem própria)", "modelo": "Voron 0.1 / 0.2", "w": 90, "vida": 8000}, {"marca": "Voron (montagem própria)", "modelo": "Switchwire", "w": 130, "vida": 8000}, {"marca": "Voron (montagem própria)", "modelo": "Trident 250", "w": 200, "vida": 10000}, {"marca": "Voron (montagem própria)", "modelo": "Trident 300", "w": 250, "vida": 10000}, {"marca": "Voron (montagem própria)", "modelo": "Trident 350", "w": 300, "vida": 10000}, {"marca": "Voron (montagem própria)", "modelo": "Voron 2.4 250", "w": 200, "vida": 10000}, {"marca": "Voron (montagem própria)", "modelo": "Voron 2.4 300", "w": 250, "vida": 10000}, {"marca": "Voron (montagem própria)", "modelo": "Voron 2.4 350", "w": 300, "vida": 10000}, {"marca": "Voxelab", "modelo": "Aquila", "w": 100, "vida": 4000}, {"marca": "Voxelab", "modelo": "Aquila X2", "w": 100, "vida": 4000}, {"marca": "Voxelab", "modelo": "Aquila C2", "w": 100, "vida": 4000}, {"marca": "Voxelab", "modelo": "Aquila S2", "w": 110, "vida": 4000}, {"marca": "Wanhao", "modelo": "Duplicator i3", "w": 110, "vida": 5000}, {"marca": "Wanhao", "modelo": "Duplicator i3 Plus", "w": 110, "vida": 5000}, {"marca": "Wanhao", "modelo": "Duplicator i3 Mini", "w": 70, "vida": 5000}, {"marca": "Wanhao", "modelo": "Duplicator 6 (D6)", "w": 140, "vida": 5000}, {"marca": "Wanhao", "modelo": "Duplicator 9 (D9)", "w": 200, "vida": 5000}, {"marca": "Wanhao", "modelo": "Duplicator 12 (D12)", "w": 120, "vida": 5000}, {"marca": "XYZprinting", "modelo": "da Vinci Mini", "w": 60, "vida": 4000}, {"marca": "XYZprinting", "modelo": "da Vinci Jr. 1.0", "w": 70, "vida": 4000}, {"marca": "XYZprinting", "modelo": "da Vinci 1.0 Pro", "w": 120, "vida": 4000}, {"marca": "XYZprinting", "modelo": "da Vinci Color", "w": 150, "vida": 4000}, {"marca": "Zortrax", "modelo": "M200", "w": 140, "vida": 12000}, {"marca": "Zortrax", "modelo": "M200 Plus", "w": 140, "vida": 12000}, {"marca": "Zortrax", "modelo": "M300", "w": 230, "vida": 12000}, {"marca": "Zortrax", "modelo": "M300 Plus", "w": 230, "vida": 12000}, {"marca": "Zortrax", "modelo": "M300 Dual", "w": 250, "vida": 12000}, {"marca": "Zortrax", "modelo": "Endureal", "w": 600, "vida": 20000}, {"marca": "Outra / Personalizada", "modelo": "Personalizada", "w": 150, "vida": 6000}];
+const RESINS = [{"marca": "Anycubic", "modelo": "Photon (original)", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Anycubic", "modelo": "Photon S", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Anycubic", "modelo": "Photon Zero", "w": 25, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Anycubic", "modelo": "Photon Mono", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Anycubic", "modelo": "Photon Mono SE", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Anycubic", "modelo": "Photon Mono 2", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Anycubic", "modelo": "Photon Mono 4", "w": 45, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Anycubic", "modelo": "Photon Mono 4 Ultra", "w": 45, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Anycubic", "modelo": "Photon Mono X", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono X 6K", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono X2", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M3", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M3 Plus", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M3 Premium", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M3 Max", "w": 90, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Anycubic", "modelo": "Photon Mono M5", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M5s", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M5s Pro", "w": 70, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Anycubic", "modelo": "Photon Mono M7", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Anycubic", "modelo": "Photon Mono M7 Pro", "w": 70, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Anycubic", "modelo": "Photon Mono M7 Max", "w": 110, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Anycubic", "modelo": "Photon Ultra (DLP)", "w": 40, "vida": 8000, "tela_h": 5000, "tela": 1200}, {"marca": "Anycubic", "modelo": "Photon D2 (DLP)", "w": 40, "vida": 8000, "tela_h": 5000, "tela": 1200}, {"marca": "Anycubic", "modelo": "Photon P1 Max", "w": 120, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Asiga (odonto)", "modelo": "Max", "w": 60, "vida": 12000, "tela_h": 5000, "tela": 1200}, {"marca": "Asiga (odonto)", "modelo": "Pro 4K", "w": 80, "vida": 12000, "tela_h": 5000, "tela": 1200}, {"marca": "Creality", "modelo": "LD-002R", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Creality", "modelo": "LD-002H", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Creality", "modelo": "LD-006", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot One", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Creality", "modelo": "Halot One Plus", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot One Pro", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot Lite", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot Sky", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot Ray", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot Mage", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot Mage Pro", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Creality", "modelo": "Halot Mage S", "w": 100, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Creality", "modelo": "Halot R6", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Creality", "modelo": "Halot-X1", "w": 85, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Elegoo", "modelo": "Mars", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Elegoo", "modelo": "Mars Pro", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Elegoo", "modelo": "Mars 2", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 2 Pro", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 3", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 3 Pro", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 4", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 4 Ultra", "w": 48, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 4 Max", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Mars 4 DLP", "w": 45, "vida": 8000, "tela_h": 5000, "tela": 1200}, {"marca": "Elegoo", "modelo": "Mars 5", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Mars 5 Ultra", "w": 50, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Elegoo", "modelo": "Saturn", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn S", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn 2", "w": 72, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn 8K", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn 3", "w": 72, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn 3 Ultra", "w": 75, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn 4", "w": 70, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Elegoo", "modelo": "Saturn 4 Ultra", "w": 80, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Elegoo", "modelo": "Saturn 4 Ultra 16K", "w": 85, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Elegoo", "modelo": "Jupiter", "w": 120, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Elegoo", "modelo": "Jupiter SE", "w": 110, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Elegoo", "modelo": "Jupiter 2", "w": 120, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "EPAX", "modelo": "X1", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "EPAX", "modelo": "X10", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "EPAX", "modelo": "X133", "w": 120, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "EPAX", "modelo": "E6", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "EPAX", "modelo": "E10", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Flashforge", "modelo": "Hunter (DLP)", "w": 90, "vida": 8000, "tela_h": 5000, "tela": 1200}, {"marca": "Flashforge", "modelo": "Foto 6.0", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Flashforge", "modelo": "Foto 8.9", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Flashforge", "modelo": "Foto 8.9S", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Flashforge", "modelo": "Foto 13.3", "w": 90, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Formlabs", "modelo": "Form 1+", "w": 60, "vida": 10000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 2", "w": 65, "vida": 15000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 3", "w": 70, "vida": 15000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 3+", "w": 70, "vida": 15000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 3B / 3B+ (odonto)", "w": 70, "vida": 15000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 4", "w": 100, "vida": 15000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 4B (odonto)", "w": 100, "vida": 15000, "tela_h": 6000, "tela": 1500}, {"marca": "Formlabs", "modelo": "Form 3L", "w": 150, "vida": 15000, "tela_h": 6000, "tela": 3000}, {"marca": "Formlabs", "modelo": "Form 3BL", "w": 150, "vida": 15000, "tela_h": 6000, "tela": 3000}, {"marca": "Formlabs", "modelo": "Form 4L", "w": 180, "vida": 15000, "tela_h": 6000, "tela": 3000}, {"marca": "Longer", "modelo": "Orange 10", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Longer", "modelo": "Orange 30", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Longer", "modelo": "Orange 120", "w": 90, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Longer", "modelo": "Orange 4K", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Nova3D", "modelo": "Elfin", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Nova3D", "modelo": "Bene4", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Nova3D", "modelo": "Bene4 Mono", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Nova3D", "modelo": "Whale", "w": 90, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Peopoly", "modelo": "Moai (laser)", "w": 80, "vida": 10000, "tela_h": 6000, "tela": 1500}, {"marca": "Peopoly", "modelo": "Phenom", "w": 150, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Peopoly", "modelo": "Phenom L", "w": 200, "vida": 15000, "tela_h": 6000, "tela": 3000}, {"marca": "Phrozen", "modelo": "Sonic", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Phrozen", "modelo": "Sonic Mini", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Phrozen", "modelo": "Sonic Mini 4K", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Phrozen", "modelo": "Sonic Mini 8K", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Phrozen", "modelo": "Sonic Mini 8K S", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Phrozen", "modelo": "Sonic 4K", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Phrozen", "modelo": "Sonic XL 4K", "w": 90, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Phrozen", "modelo": "Sonic Mighty 4K", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Phrozen", "modelo": "Sonic Mighty 8K", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Phrozen", "modelo": "Sonic Mighty 12K", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Phrozen", "modelo": "Sonic Mighty Revo", "w": 70, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Phrozen", "modelo": "Sonic Mega 8K", "w": 140, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Phrozen", "modelo": "Sonic Mega 8K S", "w": 140, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Phrozen", "modelo": "Transform", "w": 150, "vida": 6000, "tela_h": 2000, "tela": 900}, {"marca": "Prusa", "modelo": "SL1", "w": 60, "vida": 12000, "tela_h": 6000, "tela": 1500}, {"marca": "Prusa", "modelo": "SL1S Speed", "w": 60, "vida": 12000, "tela_h": 6000, "tela": 1500}, {"marca": "SprintRay (odonto)", "modelo": "Pro 55", "w": 90, "vida": 12000, "tela_h": 5000, "tela": 1200}, {"marca": "SprintRay (odonto)", "modelo": "Pro 95", "w": 110, "vida": 12000, "tela_h": 5000, "tela": 1200}, {"marca": "SprintRay (odonto)", "modelo": "Midas", "w": 120, "vida": 12000, "tela_h": 6000, "tela": 1500}, {"marca": "Uniformation", "modelo": "GKone", "w": 70, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Uniformation", "modelo": "GKtwo", "w": 85, "vida": 6000, "tela_h": 2000, "tela": 650}, {"marca": "Voxelab", "modelo": "Proxima 6", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Voxelab", "modelo": "Polaris", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Voxelab", "modelo": "Ceres", "w": 35, "vida": 5000, "tela_h": 2000, "tela": 350}, {"marca": "Wanhao", "modelo": "Duplicator 7 (D7)", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Wanhao", "modelo": "Duplicator 7 Plus", "w": 30, "vida": 4000, "tela_h": 500, "tela": 200}, {"marca": "Wanhao", "modelo": "Duplicator 8 (D8)", "w": 55, "vida": 6000, "tela_h": 2000, "tela": 550}, {"marca": "Zortrax", "modelo": "Inkspire", "w": 70, "vida": 10000, "tela_h": 6000, "tela": 1500}, {"marca": "Zortrax", "modelo": "Inkspire 2", "w": 80, "vida": 10000, "tela_h": 6000, "tela": 1500}, {"marca": "Outra / Personalizada", "modelo": "Personalizada", "w": 50, "vida": 5000, "tela_h": 2000, "tela": 500}];
+const $ = id => document.getElementById(id);
+const brl = v => (isFinite(v)?v:0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num = s => { if(s==null) return NaN; s=String(s).trim().replace(/\s|R\$/g,''); if(s.includes(',')) s=s.replace(/\./g,'').replace(',','.'); return parseFloat(s); };
+const nz = (s, d=0) => { const v=num(s); return isFinite(v)?v:d; };
+const KEY='calc3d.v1';
+const DEF={marca:'Bambu Lab',modelo:'P1S',valor:'5000',kwh:'1,40',wown:'',vown:'',fil:'130',peso:'680',d:1,h:9,m:20,mh:0,mm:10,vh:'25',falha:'15',margem:'120',extra:'0',taxa:'0'};
+const RDEF={r_marca:'Elegoo',r_modelo:'Saturn 4 Ultra',r_valor:'2500',r_kwh:'',r_wown:'',r_vown:'',r_town:'',r_thown:'',r_preco:'180',r_tam:'1000',r_und:'g',r_dens:'1,10',r_vol:'50',r_perda:'10',r_fep:'60',r_feph:'200',r_ipa:'3',rd:0,rh:4,rm:30,rmh:0,rmm:20,r_vh:'25',r_falha:'10',r_margem:'150',r_extra:'0',r_taxa:'0',modo:''};
+Object.assign(DEF,RDEF);
+let st = Object.assign({}, DEF);
+try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) st=Object.assign(st,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+
+/* ---------- marcas e modelos ---------- */
+const brands=[...new Set(PRINTERS.map(p=>p.marca))];
+$('marca').innerHTML=brands.map(b=>`<option>${b}</option>`).join('');
+function fillModels(keep){
+  const ms=PRINTERS.filter(p=>p.marca===$('marca').value);
+  $('modelo').innerHTML=ms.map(p=>`<option>${p.modelo}</option>`).join('');
+  if(keep && ms.some(p=>p.modelo===keep)) $('modelo').value=keep;
+}
+$('marca').value=brands.includes(st.marca)?st.marca:DEF.marca; fillModels(st.modelo);
+$('marca').onchange=()=>{fillModels();calc();};
+$('modelo').onchange=calc;
+const cur=()=>PRINTERS.find(p=>p.marca===$('marca').value&&p.modelo===$('modelo').value)||PRINTERS[0];
+
+/* ---------- campos de texto ---------- */
+const fields=['valor','kwh','wown','vown','fil','peso','vh','falha','margem','extra','taxa'];
+fields.forEach(f=>{const el=$(f); el.value=st[f]; el.addEventListener('input',calc);});
+
+/* ---------- seletor de tempo (clique ou digite) ---------- */
+const TP={};
+let openPop=null;
+document.querySelectorAll('.tp[data-id]').forEach(box=>{
+  const id=box.dataset.id,max=+box.dataset.max,unit=box.dataset.unit;
+  box.innerHTML=`<div class="box"><button type="button" class="st" aria-label="menos">−</button><input inputmode="numeric" maxlength="2" aria-label="${unit}"><button type="button" class="st" aria-label="mais">+</button></div><div class="unit">${unit} (0–${max})</div><div class="pop" role="listbox"><div class="ttl">Escolha ${unit} — ou digite</div></div>`;
+  const inp=box.querySelector('input'),pop=box.querySelector('.pop'),[minus,plus]=box.querySelectorAll('.st');
+  for(let i=0;i<=max;i++){const b=document.createElement('button');b.type='button';b.textContent=i;b.dataset.v=i;pop.appendChild(b);}
+  const set=(v,fromTyping)=>{v=Math.max(0,Math.min(max,Math.round(v)||0));st[id]=v;if(!fromTyping)inp.value=v;mark(v);calc();};
+  const mark=(v,hl)=>pop.querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',+b.dataset.v===v);b.classList.toggle('hl',hl!=null&&b.dataset.v.startsWith(hl)&&hl!=='');});
+  const open=()=>{if(openPop&&openPop!==pop)openPop.classList.remove('open');pop.classList.add('open');openPop=pop;const s=pop.querySelector('.sel');if(s)s.scrollIntoView({block:'nearest'});};
+  inp.addEventListener('focus',()=>{open();inp.select();});
+  inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');const t=inp.value;if(t===''){mark(-1);st[id]=0;calc();return;}let v=+t;if(v>max){v=max;inp.value=v;}set(v,true);mark(v,t);});
+  inp.addEventListener('blur',()=>{setTimeout(()=>{if(document.activeElement!==inp)pop.classList.remove('open');},150);inp.value=st[id];});
+  inp.addEventListener('keydown',e=>{if(e.key==='ArrowUp'){e.preventDefault();set(st[id]+1);}if(e.key==='ArrowDown'){e.preventDefault();set(st[id]-1);}if(e.key==='Enter'||e.key==='Escape'){pop.classList.remove('open');inp.blur();}});
+  pop.addEventListener('mousedown',e=>e.preventDefault());
+  pop.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;set(+b.dataset.v);pop.classList.remove('open');inp.blur();});
+  minus.onclick=()=>set(st[id]-1);plus.onclick=()=>set(st[id]+1);
+  TP[id]={set,inp};
+  inp.value=st[id]??box.dataset.val; mark(+inp.value);
+});
+document.addEventListener('click',e=>{if(openPop&&!e.target.closest('.tp')){openPop.classList.remove('open');openPop=null;}});
+
+/* ---------- cálculo ---------- */
+const COLORS={Material:'#ff7a1a',Energia:'#ffd166',Depreciação:'#4dabf7',Mão:'#b197fc',Falhas:'#ff6b6b',Extras:'#63e6be'};
+let last={};
+function calc(){calcFdm();calcResin();}
+function calcFdm(){
+  fields.forEach(f=>st[f]=$(f).value); st.marca=$('marca').value; st.modelo=$('modelo').value;
+  const p=cur();
+  const W = isFinite(num(st.wown))&&num(st.wown)>0 ? num(st.wown) : p.w;
+  const V = isFinite(num(st.vown))&&num(st.vown)>0 ? num(st.vown) : p.vida;
+  $('pW').textContent=W+' W'+(W!==p.w?' (seu)':'');
+  $('pV').textContent=V.toLocaleString('pt-BR')+' h'+(V!==p.vida?' (sua)':'');
+  const t = (+st.d||0)*24 + (+st.h||0) + (+st.m||0)/60;
+  const mat = nz(st.fil)/1000*nz(st.peso);
+  const kwhT = W/1000*t;
+  const en = kwhT*nz(st.kwh);
+  const dep = V>0 ? nz(st.valor)/V*t : 0;
+  const prod = mat+en+dep;
+  const mo = ((+st.mh||0)+(+st.mm||0)/60)*nz(st.vh);
+  const fal = (prod+mo)*nz(st.falha)/100;
+  const ext = nz(st.extra);
+  const tot = prod+mo+fal+ext;
+  const tx = Math.min(Math.max(nz(st.taxa)/100,0),0.99);
+  const preco = tot*(1+nz(st.margem)/100)/(1-tx);
+  const txv = preco*tx;
+  const lucro = preco-tot-txv;
+  last={p,W,V,t,mat,en,dep,prod,mo,fal,ext,tot,preco,txv,lucro,kwhT};
+  $('rPreco').textContent=brl(preco); $('rTot').textContent=brl(tot); $('rLucro').textContent=brl(lucro);
+  $('rMat').textContent=brl(mat); $('rEn').textContent=brl(en); $('rKwh').textContent=kwhT.toLocaleString('pt-BR',{maximumFractionDigits:2})+' kWh';
+  $('rDep').textContent=brl(dep); $('rProd').textContent=brl(prod); $('rMo').textContent=brl(mo);
+  $('rFal').textContent=brl(fal); $('rExt').textContent=brl(ext); $('rTx').textContent=brl(txv);
+  $('rT').textContent=fmtT(); $('rCh').textContent=t>0?brl(tot/t)+'/h':'–';
+  const parts=[['Material',mat],['Energia',en],['Depreciação',dep],['Mão',mo],['Falhas',fal],['Extras',ext]].filter(x=>x[1]>0);
+  $('bar').innerHTML=parts.map(([k,v])=>`<div style="width:${tot>0?v/tot*100:0}%;background:${COLORS[k]}"></div>`).join('');
+  $('legend').innerHTML=parts.map(([k,v])=>`<span><i style="background:${COLORS[k]}"></i>${k==='Mão'?'Mão de obra':k} ${tot>0?Math.round(v/tot*100):0}%</span>`).join('');
+  save();
+}
+function fmtT(){const a=[];if(+st.d)a.push(st.d+'d');a.push((+st.h||0)+'h');a.push(String(+st.m||0).padStart(2,'0')+'min');return a.join(' ');}
+
+/* ---------- botões ---------- */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+$('copy').onclick=async()=>{
+  const L=last;
+  const txt=`🧾 Orçamento – Impressão 3D\n`+
+  `Impressora: ${L.p.marca} ${L.p.modelo}\nPeça: ${nz(st.peso).toLocaleString('pt-BR')} g • Tempo: ${fmtT()}\n\n`+
+  `Material: ${brl(L.mat)}\nEnergia: ${brl(L.en)}\nDepreciação: ${brl(L.dep)}\nMão de obra: ${brl(L.mo)}\nFalhas: ${brl(L.fal)}\n`+
+  (L.ext?`Extras: ${brl(L.ext)}\n`:'')+(L.txv?`Taxa marketplace: ${brl(L.txv)}\n`:'')+
+  `\nCusto total: ${brl(L.tot)}\n💰 Preço de venda: ${brl(L.preco)}\n✅ Lucro: ${brl(L.lucro)}`;
+  try{await navigator.clipboard.writeText(txt);toast('Orçamento copiado!');}
+  catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Orçamento copiado!');}catch(_){toast('Não foi possível copiar');}ta.remove();}
+};
+$('reset').onclick=()=>{Object.keys(DEF).filter(k=>!(k in RDEF)).forEach(k=>st[k]=DEF[k]);fields.forEach(f=>$(f).value=st[f]);$('marca').value=st.marca;fillModels(st.modelo);
+  Object.entries(TP).forEach(([k,o])=>{o.inp.value=st[k];o.set(st[k]);});calc();toast('Valores padrão restaurados');};
+
+/* ---------- busca de impressora ---------- */
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9+]/g,'');
+const toks=q=>q.toLowerCase().split(/[\s\-\/]+/).map(norm).filter(Boolean);
+const match=(k,ts)=>ts.length>0&&ts.every(t=>k.includes(t));
+const IDX=PRINTERS.map(p=>({p,k:norm(p.marca+' '+p.modelo),m:norm(p.modelo)}));
+let act=-1,hits=[];
+function showResults(){
+  const q=norm($('busca').value),ts=toks($('busca').value),box=$('results');
+  if(!q){box.classList.remove('open');return;}
+  hits=IDX.filter(x=>match(x.k,ts)).sort((a,b)=>(b.m.startsWith(q)-a.m.startsWith(q))||(a.m.length-b.m.length)).slice(0,40);
+  act=-1;
+  box.innerHTML=hits.length?hits.map((x,i)=>`<button type="button" data-i="${i}"><span>${x.p.modelo}</span><small>${x.p.marca}</small></button>`).join('')
+    :'<div class="none">Nenhuma impressora encontrada. Escolha "Outra / Personalizada" na lista de marcas e digite o consumo em "Ajustar manualmente".</div>';
+  box.classList.add('open');
+}
+function pick(i){const p=hits[i].p;$('marca').value=p.marca;fillModels(p.modelo);$('busca').value='';$('results').classList.remove('open');calc();toast(p.marca+' '+p.modelo);}
+$('busca').addEventListener('input',showResults);
+$('busca').addEventListener('focus',showResults);
+$('busca').addEventListener('keydown',e=>{const bs=$('results').querySelectorAll('button');if(!bs.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();act=Math.min(act+1,bs.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();act=Math.max(act-1,0);}
+  else if(e.key==='Enter'){e.preventDefault();pick(act<0?0:act);return;}
+  else if(e.key==='Escape'){$('results').classList.remove('open');return;}
+  bs.forEach((b,i)=>b.classList.toggle('act',i===act));if(bs[act])bs[act].scrollIntoView({block:'nearest'});});
+$('results').addEventListener('mousedown',e=>e.preventDefault());
+$('results').addEventListener('click',e=>{const b=e.target.closest('button');if(b)pick(+b.dataset.i);});
+$('busca').addEventListener('blur',()=>setTimeout(()=>$('results').classList.remove('open'),150));
+$('busca').placeholder=`Buscar entre ${PRINTERS.length-1} modelos de ${brands.length-1} marcas (ex.: K1, Neptune 2)`;
+
+/* ---------- ajuda do kWh ---------- */
+$('kwhHelpBtn').onclick=()=>{const h=$('kwhHelp');h.hidden=!h.hidden;$('kwhHelpBtn').setAttribute('aria-expanded',!h.hidden);
+  $('kwhHelpBtn').textContent=h.hidden?'ⓘ Onde acho isso na conta de luz?':'✕ Fechar ajuda';};
+let hVal=null;
+function hCalc(){const t=num($('hTot').value),k=num($('hKwh').value);
+  if(isFinite(t)&&isFinite(k)&&t>0&&k>0){hVal=t/k;$('hRes').textContent='R$ '+hVal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' por kWh';$('hUse').disabled=false;}
+  else{hVal=null;$('hRes').textContent='–';$('hUse').disabled=true;}}
+$('hTot').addEventListener('input',hCalc);$('hKwh').addEventListener('input',hCalc);
+$('hUse').onclick=()=>{if(hVal==null)return;$('kwh').value=hVal.toLocaleString('pt-BR',{maximumFractionDigits:3});calc();
+  $('kwhHelp').hidden=true;$('kwhHelpBtn').textContent='ⓘ Onde acho isso na conta de luz?';toast('Preço do kWh aplicado!');};
+
+
+/* ================= RESINA ================= */
+const rbrands=[...new Set(RESINS.map(p=>p.marca))];
+$('r_marca').innerHTML=rbrands.map(b=>`<option>${b}</option>`).join('');
+function rFill(keep){const ms=RESINS.filter(p=>p.marca===$('r_marca').value);
+  $('r_modelo').innerHTML=ms.map(p=>`<option>${p.modelo}</option>`).join('');
+  if(keep&&ms.some(p=>p.modelo===keep))$('r_modelo').value=keep;}
+$('r_marca').value=rbrands.includes(st.r_marca)?st.r_marca:RDEF.r_marca; rFill(st.r_modelo);
+$('r_marca').onchange=()=>{rFill();calc();}; $('r_modelo').onchange=calc;
+const rcur=()=>RESINS.find(p=>p.marca===$('r_marca').value&&p.modelo===$('r_modelo').value)||RESINS[0];
+if(!st.r_kwh) st.r_kwh=st.kwh||'1,40';
+const rfields=['r_valor','r_kwh','r_wown','r_vown','r_town','r_thown','r_preco','r_tam','r_und','r_dens','r_vol','r_perda','r_fep','r_feph','r_ipa','r_vh','r_falha','r_margem','r_extra','r_taxa'];
+rfields.forEach(f=>{const el=$(f);el.value=st[f];el.addEventListener(el.tagName==='SELECT'?'change':'input',calc);});
+const RCOL={Resina:'#8b7bff',Energia:'#ffd166',Depreciação:'#4dabf7',Tela:'#ff9f43',FEP:'#63e6be',Limpeza:'#74c0fc',Mão:'#f783ac',Falhas:'#ff6b6b',Extras:'#a9e34b'};
+let rlast={};
+const rT=()=>(+st.rd||0)*24+(+st.rh||0)+(+st.rm||0)/60;
+function rfmtT(){const a=[];if(+st.rd)a.push(st.rd+'d');a.push((+st.rh||0)+'h');a.push(String(+st.rm||0).padStart(2,'0')+'min');return a.join(' ');}
+const pos=(v)=>isFinite(num(v))&&num(v)>0?num(v):null;
+function calcResin(){
+  if(!$('r_marca'))return;
+  rfields.forEach(f=>st[f]=$(f).value); st.r_marca=$('r_marca').value; st.r_modelo=$('r_modelo').value;
+  const p=rcur();
+  const W=pos(st.r_wown)??p.w, V=pos(st.r_vown)??p.vida, TP=pos(st.r_town)??p.tela, TH=pos(st.r_thown)??p.tela_h;
+  $('r_pW').textContent=W+' W'+(W!==p.w?' (seu)':'');
+  $('r_pV').textContent=V.toLocaleString('pt-BR')+' h'+(V!==p.vida?' (sua)':'');
+  $('r_pT').textContent=brl(TP)+' / '+TH.toLocaleString('pt-BR')+' h';
+  const t=rT();
+  const dens=nz(st.r_dens,1.1)||1.1, tam=nz(st.r_tam);
+  const precoMl = tam>0 ? (st.r_und==='ml' ? nz(st.r_preco)/tam : nz(st.r_preco)/(tam/dens)) : 0;
+  const ml = nz(st.r_vol)*(1+nz(st.r_perda)/100);
+  const res = ml*precoMl;
+  const en = W/1000*t*nz(st.r_kwh);
+  const dep = V>0? nz(st.r_valor)/V*t : 0;
+  const tela = TH>0? TP/TH*t : 0;
+  const fep = nz(st.r_feph)>0? nz(st.r_fep)/nz(st.r_feph)*t : 0;
+  const ipa = nz(st.r_ipa);
+  const prod=res+en+dep+tela+fep+ipa;
+  const mo=((+st.rmh||0)+(+st.rmm||0)/60)*nz(st.r_vh);
+  const fal=(prod+mo)*nz(st.r_falha)/100;
+  const ext=nz(st.r_extra);
+  const tot=prod+mo+fal+ext;
+  const tx=Math.min(Math.max(nz(st.r_taxa)/100,0),0.99);
+  const preco=tot*(1+nz(st.r_margem)/100)/(1-tx), txv=preco*tx, lucro=preco-tot-txv;
+  rlast={p,t,ml,res,en,dep,tela,fep,ipa,prod,mo,fal,ext,tot,preco,txv,lucro};
+  const set=(id,v)=>$(id).textContent=v;
+  set('r_rPreco',brl(preco));set('r_rTot',brl(tot));set('r_rLucro',brl(lucro));
+  set('r_rMl',ml.toLocaleString('pt-BR',{maximumFractionDigits:1})+' ml');set('r_rRes',brl(res));set('r_rEn',brl(en));
+  set('r_rDep',brl(dep));set('r_rTela',brl(tela));set('r_rFep',brl(fep));set('r_rIpa',brl(ipa));set('r_rProd',brl(prod));
+  set('r_rMo',brl(mo));set('r_rFal',brl(fal));set('r_rExt',brl(ext));set('r_rTx',brl(txv));set('r_rT',rfmtT());
+  const parts=[['Resina',res],['Energia',en],['Depreciação',dep],['Tela',tela],['FEP',fep],['Limpeza',ipa],['Mão',mo],['Falhas',fal],['Extras',ext]].filter(x=>x[1]>0);
+  $('r_bar').innerHTML=parts.map(([k,v])=>`<div style="width:${tot>0?v/tot*100:0}%;background:${RCOL[k]}"></div>`).join('');
+  $('r_legend').innerHTML=parts.map(([k,v])=>`<span><i style="background:${RCOL[k]}"></i>${k==='Mão'?'Mão de obra':k} ${tot>0?Math.round(v/tot*100):0}%</span>`).join('');
+  save();
+}
+$('r_copy').onclick=async()=>{const L=rlast;
+  const txt=`🧾 Orçamento – Impressão 3D em Resina\nImpressora: ${L.p.marca} ${L.p.modelo}\nResina: ${L.ml.toLocaleString('pt-BR',{maximumFractionDigits:1})} ml • Tempo: ${rfmtT()}\n\n`+
+  `Resina: ${brl(L.res)}\nEnergia: ${brl(L.en)}\nDepreciação: ${brl(L.dep)}\nTela LCD + FEP: ${brl(L.tela+L.fep)}\nÁlcool/limpeza: ${brl(L.ipa)}\nMão de obra: ${brl(L.mo)}\nFalhas: ${brl(L.fal)}\n`+
+  (L.ext?`Extras: ${brl(L.ext)}\n`:'')+(L.txv?`Taxa marketplace: ${brl(L.txv)}\n`:'')+
+  `\nCusto total: ${brl(L.tot)}\n💰 Preço de venda: ${brl(L.preco)}\n✅ Lucro: ${brl(L.lucro)}`;
+  try{await navigator.clipboard.writeText(txt);toast('Orçamento copiado!');}
+  catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Orçamento copiado!');}catch(_){toast('Não foi possível copiar');}ta.remove();}};
+$('r_reset').onclick=()=>{Object.keys(RDEF).filter(k=>k!=='modo').forEach(k=>st[k]=RDEF[k]);st.r_kwh=st.kwh||'1,40';
+  rfields.forEach(f=>$(f).value=st[f]);$('r_marca').value=st.r_marca;rFill(st.r_modelo);
+  ['rd','rh','rm','rmh','rmm'].forEach(k=>{TP[k].inp.value=st[k];TP[k].set(st[k]);});calc();toast('Valores padrão restaurados');};
+
+/* busca genérica (resina) */
+function makeSearch(inp,box,list,onPick,emptyMsg){
+  const I=list.map(p=>({p,k:norm(p.marca+' '+p.modelo),m:norm(p.modelo)}));let h=[],a=-1;
+  const show=()=>{const q=norm($(inp).value),ts=toks($(inp).value);if(!q){$(box).classList.remove('open');return;}
+    h=I.filter(x=>match(x.k,ts)).sort((x,y)=>(y.m.startsWith(q)-x.m.startsWith(q))||(x.m.length-y.m.length)).slice(0,40);a=-1;
+    $(box).innerHTML=h.length?h.map((x,i)=>`<button type="button" data-i="${i}"><span>${x.p.modelo}</span><small>${x.p.marca}</small></button>`).join(''):`<div class="none">${emptyMsg}</div>`;
+    $(box).classList.add('open');};
+  const pk=i=>{onPick(h[i].p);$(inp).value='';$(box).classList.remove('open');};
+  $(inp).addEventListener('input',show);$(inp).addEventListener('focus',show);
+  $(inp).addEventListener('keydown',e=>{const bs=$(box).querySelectorAll('button');if(!bs.length)return;
+    if(e.key==='ArrowDown'){e.preventDefault();a=Math.min(a+1,bs.length-1);}else if(e.key==='ArrowUp'){e.preventDefault();a=Math.max(a-1,0);}
+    else if(e.key==='Enter'){e.preventDefault();pk(a<0?0:a);return;}else if(e.key==='Escape'){$(box).classList.remove('open');return;}
+    bs.forEach((b,i)=>b.classList.toggle('act',i===a));if(bs[a])bs[a].scrollIntoView({block:'nearest'});});
+  $(box).addEventListener('mousedown',e=>e.preventDefault());
+  $(box).addEventListener('click',e=>{const b=e.target.closest('button');if(b)pk(+b.dataset.i);});
+  $(inp).addEventListener('blur',()=>setTimeout(()=>$(box).classList.remove('open'),150));
+}
+makeSearch('r_busca','r_results',RESINS,p=>{$('r_marca').value=p.marca;rFill(p.modelo);calc();toast(p.marca+' '+p.modelo);},
+  'Nenhuma impressora encontrada. Escolha "Outra / Personalizada" e ajuste os valores manualmente.');
+$('r_busca').placeholder=`Buscar entre ${RESINS.length-1} modelos de ${rbrands.length-1} marcas (ex.: Saturn, Photon)`;
+
+/* ================= ESCOLHA DO MODO ================= */
+function setMode(m){if(m!=='doe'){st.modo=m;save();}
+  $('modeDoe').classList.toggle('on',m==='doe');$('tabDoe').classList.toggle('on',m==='doe');
+  $('modeFdm').classList.toggle('on',m==='fdm');$('modeRes').classList.toggle('on',m==='res');
+  $('tabFdm').classList.toggle('on',m==='fdm');$('tabRes').classList.toggle('on',m==='res');
+  $('chooser').classList.add('hide');document.title=(m==='res'?'Resina':m==='doe'?'Apoiar':'Filamento')+' – Calculadora de Impressão 3D';
+  try{history.replaceState(null,'','#'+(m==='res'?'resina':m==='doe'?'apoiar':'filamento'));}catch(e){}
+  window.scrollTo(0,0);}
+$('pickFdm').onclick=()=>setMode('fdm');$('pickRes').onclick=()=>setMode('res');
+$('tabFdm').onclick=()=>setMode('fdm');$('tabRes').onclick=()=>setMode('res');$('tabDoe').onclick=()=>setMode('doe');$('pickDoe').onclick=()=>setMode('doe');
+$('copyPhone').onclick=async()=>{const n='86988477452';try{await navigator.clipboard.writeText(n);toast('Chave PIX copiada!');}catch(e){const ta=document.createElement('textarea');ta.value=n;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Chave PIX copiada!');}catch(_){toast('Copie: (86) 98847-7452');}ta.remove();}};
+if(st.modo==='res')$('pickRes').classList.add('last');else if(st.modo==='fdm')$('pickFdm').classList.add('last');
+const hm=location.hash.replace('#','');
+if(hm==='resina')setMode('res');else if(hm==='filamento')setMode('fdm');else if(hm==='apoiar')setMode('doe');
+
+/* ---------- instalar como app (PWA) ---------- */
+let deferred=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBox').style.display='flex';});
+$('install').onclick=async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;$('installBox').style.display='none';};
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+
+calc();
+</script>
+</body>
+</html>
