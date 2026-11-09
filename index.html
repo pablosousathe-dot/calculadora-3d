@@ -138,6 +138,17 @@ footer{color:var(--mut);font-size:12px;text-align:center;margin-top:24px;line-he
 .offl p{margin:4px 0 10px;color:var(--mut);font-size:14px}
 a.insbtn{display:inline-block;text-decoration:none;text-align:center}
 .inslink{display:inline-block;margin-top:8px;color:#4dabf7;background:none;border:0;font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* atualizacao / avisos */
+.upd{position:relative;z-index:60;display:none;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(135deg,#1c7ed6,#4dabf7);color:#fff;padding:12px 16px;border-radius:0 0 14px 14px;box-shadow:0 8px 24px rgba(0,0,0,.25);margin:0 auto;max-width:1080px}
+.upd.show{display:flex}
+.upd.aviso{background:linear-gradient(135deg,#7048e8,#9775fa)}
+.upd .tx{flex:1;min-width:220px;font-size:14px;line-height:1.4}
+.upd .tx b{font-size:15px}
+.upd .bt{display:flex;gap:8px}
+.upd button,.upd a{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer;background:#fff;color:#1c3f6e;text-decoration:none;white-space:nowrap}
+.upd .x{background:rgba(255,255,255,.2);color:#fff}
+.ver{opacity:.8}
 /* escolha de modo */
 .chooser{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
 .chooser.hide{display:none}
@@ -202,6 +213,8 @@ a.insbtn{display:inline-block;text-decoration:none;text-align:center}
     <button type="button" class="doelink" id="pickDoe">❤️ Gostou? Apoie o projeto</button>
   </div>
 </div>
+<div class="upd" id="updBar" role="status"><div class="tx" id="updTx"></div><div class="bt"><button type="button" id="updGo">Atualizar agora</button><button type="button" class="x" id="updX" aria-label="Fechar">✕</button></div></div>
+<div class="upd aviso" id="avisoBar" role="status"><div class="tx" id="avisoTx"></div><div class="bt"><a id="avisoLink" href="#" target="_blank" rel="noopener" style="display:none">Saiba mais</a><button type="button" class="x" id="avisoX" aria-label="Fechar">✕</button></div></div>
 <div class="wrap">
 <header>
   <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg></div>
@@ -502,7 +515,7 @@ a.insbtn{display:inline-block;text-decoration:none;text-align:center}
 
 <footer>
   Consumo médio, vida útil e vida da tela são <b>estimativas</b> por tipo de máquina (consumo real imprimindo, não a potência da etiqueta).<br>
-  Para precisão total, meça com uma tomada inteligente e digite em “Ajustar manualmente”. Seus valores ficam salvos neste aparelho.
+  Para precisão total, meça com uma tomada inteligente e digite em “Ajustar manualmente”. Seus valores ficam salvos neste aparelho.<br><span class="ver">Versão <span id="appVer"></span></span>
 </footer>
 </div>
 <div class="toast" id="toast">Copiado!</div>
@@ -774,6 +787,47 @@ $('copyPhone').addEventListener('click',()=>gcEvent('pix-copiado','Copiou chave 
 $('tabIns').addEventListener('click',()=>gcEvent('aba-instalar','Abriu aba Instalar'));
 $('pickIns').addEventListener('click',()=>gcEvent('aba-instalar','Abriu aba Instalar'));
 $('dlFile').addEventListener('click',()=>gcEvent('download-arquivo-offline','DOWNLOAD – arquivo offline (.html)'));
+
+
+/* ---------- atualizações e avisos ---------- */
+const APP_VERSION='1.0.0';
+const SITE_URL='https://pablosousathe-dot.github.io/calculadora-3d/';
+$('appVer').textContent=APP_VERSION;
+const vcmp=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0?1:-1;}return 0;};
+const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isFile=location.protocol==='file:';
+async function checkUpdates(){
+  if(navigator.onLine===false)return;
+  let info;
+  try{info=await (await fetch(SITE_URL+'version.json?t='+Date.now(),{cache:'no-store'})).json();}catch(e){return;}
+  // nova versão
+  if(info.version&&vcmp(info.version,APP_VERSION)>0){
+    let dismissed=null;try{dismissed=localStorage.getItem('calc3d.updx');}catch(e){}
+    if(dismissed!==info.version){
+      $('updTx').innerHTML='<b>🎉 Nova versão '+esc(info.version)+' disponível!</b>'+(info.notas?'<br>'+esc(info.notas):'');
+      if(isFile){$('updGo').textContent='Baixar nova versão';$('updGo').onclick=()=>{window.open(SITE_URL+'#instalar','_blank');};}
+      else{$('updGo').textContent='Atualizar agora';$('updGo').onclick=async()=>{try{const r=await navigator.serviceWorker?.getRegistration();if(r)await r.update();const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}catch(e){}location.reload();};}
+      $('updX').onclick=()=>{$('updBar').classList.remove('show');try{localStorage.setItem('calc3d.updx',info.version);}catch(e){}};
+      $('updBar').classList.add('show');
+      try{gcEvent('aviso-atualizacao','Viu aviso de atualização '+info.version);}catch(e){}
+    }
+  }
+  // avisos (assinatura, licença, novidades)
+  const av=info.aviso;
+  if(av&&av.id&&av.texto){
+    let seen=null;try{seen=localStorage.getItem('calc3d.aviso');}catch(e){}
+    if(seen!==String(av.id)){
+      $('avisoTx').innerHTML=(av.titulo?'<b>'+esc(av.titulo)+'</b><br>':'')+esc(av.texto);
+      if(av.link){$('avisoLink').href=av.link;$('avisoLink').textContent=av.botao||'Saiba mais';$('avisoLink').style.display='inline-block';}
+      $('avisoX').onclick=()=>{$('avisoBar').classList.remove('show');try{localStorage.setItem('calc3d.aviso',String(av.id));}catch(e){}};
+      $('avisoBar').classList.add('show');
+    }
+  }
+}
+checkUpdates();
+setInterval(checkUpdates,30*60*1000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdates();});
+window.addEventListener('online',checkUpdates);
 
 /* ---------- instalar como app (PWA) ---------- */
 let deferred=null;
