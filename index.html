@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Calc 3D">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
+<script data-goatcounter="https://calc3dpablo.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <style>
@@ -756,6 +757,24 @@ if(st.modo==='res')$('pickRes').classList.add('last');else if(st.modo==='fdm')$(
 const hm=location.hash.replace('#','');
 if(hm==='resina')setMode('res');else if(hm==='filamento')setMode('fdm');else if(hm==='apoiar')setMode('doe');else if(hm==='instalar')setMode('ins');
 
+
+/* ---------- contador de uso (GoatCounter, sem cookies) ---------- */
+function gcEvent(path,title){
+  const send=()=>{try{window.goatcounter.count({path:path,title:title||path,event:true});}catch(e){}};
+  if(window.goatcounter&&window.goatcounter.count){send();return;}
+  let n=0;const t=setInterval(()=>{if(window.goatcounter&&window.goatcounter.count){clearInterval(t);send();}else if(++n>20)clearInterval(t);},500);
+}
+$('pickFdm').addEventListener('click',()=>gcEvent('uso-filamento','Escolheu Filamento (FDM)'));
+$('pickRes').addEventListener('click',()=>gcEvent('uso-resina','Escolheu Resina'));
+$('copy').addEventListener('click',()=>gcEvent('orcamento-filamento','Copiou orçamento – Filamento'));
+$('r_copy').addEventListener('click',()=>gcEvent('orcamento-resina','Copiou orçamento – Resina'));
+$('tabDoe').addEventListener('click',()=>gcEvent('aba-apoiar','Abriu aba Apoiar'));
+$('pickDoe').addEventListener('click',()=>gcEvent('aba-apoiar','Abriu aba Apoiar'));
+$('copyPhone').addEventListener('click',()=>gcEvent('pix-copiado','Copiou chave PIX'));
+$('tabIns').addEventListener('click',()=>gcEvent('aba-instalar','Abriu aba Instalar'));
+$('pickIns').addEventListener('click',()=>gcEvent('aba-instalar','Abriu aba Instalar'));
+$('dlFile').addEventListener('click',()=>gcEvent('download-arquivo-offline','DOWNLOAD – arquivo offline (.html)'));
+
 /* ---------- instalar como app (PWA) ---------- */
 let deferred=null;
 const ua=navigator.userAgent||'';
@@ -768,11 +787,12 @@ function insUI(){
   else{$('insBtn').style.display='none';$('insState').innerHTML='<p style="margin:0">Siga o passo a passo do <b>seu aparelho</b> abaixo 👇</p>';}
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBox').style.display='flex';insUI();});
-window.addEventListener('appinstalled',()=>{deferred=null;$('installBox').style.display='none';$('insState').innerHTML='<div class="insok">✅ App instalado! Procure o ícone “Calc 3D” no seu aparelho.</div>';$('insBtn').style.display='none';});
+window.addEventListener('appinstalled',()=>{gcEvent('download-app-instalado','DOWNLOAD – app instalado ('+DEV+')');deferred=null;$('installBox').style.display='none';$('insState').innerHTML='<div class="insok">✅ App instalado! Procure o ícone “Calc 3D” no seu aparelho.</div>';$('insBtn').style.display='none';});
 const doInstall=async()=>{if(!deferred){setMode('ins');return;}deferred.prompt();await deferred.userChoice;deferred=null;$('installBox').style.display='none';insUI();};
 $('install').onclick=doInstall;$('insBtn').onclick=doInstall;
 if(DEV==='ios'||DEV==='android'){const f=document.querySelector('.offl');if(f)f.style.display='none';}
 insUI();
+try{if(standalone&&!localStorage.getItem('calc3d.inst')){localStorage.setItem('calc3d.inst','1');gcEvent('download-app-primeira-abertura','DOWNLOAD – 1ª abertura do app instalado ('+DEV+')');}}catch(e){}
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 
 calc();
