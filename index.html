@@ -115,6 +115,28 @@ footer{color:var(--mut);font-size:12px;text-align:center;margin-top:24px;line-he
 .steps{text-align:left;margin:8px 0 0;padding-left:20px;color:var(--txt)}
 .steps li{margin:6px 0}
 .doelink{display:inline-block;margin-top:14px;color:#f06595;background:none;border:0;font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+.tabs button.on.ins{background:#1c7ed6}
+#modeIns .card{max-width:760px;margin:0 auto}
+#modeIns h2{color:#4dabf7}
+.insbig{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:8px 0 4px}
+.insbig .ic{font-size:46px;line-height:1}
+.insbig p{color:var(--mut);margin:0 0 6px;max-width:560px}
+.insbtn{border:0;border-radius:12px;padding:14px 22px;font:inherit;font-weight:750;font-size:16px;cursor:pointer;background:#1c7ed6;color:#fff;min-width:260px}
+.insbtn.sec{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
+.insok{background:rgba(62,207,142,.15);border:1px solid var(--ok);color:var(--ok);border-radius:12px;padding:12px 16px;font-weight:650}
+.devs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:620px){.devs{grid-template-columns:1fr}}
+.dev{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.dev.me{border:2px solid #1c7ed6}
+.dev h3{margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:8px}
+.dev .tag{font-size:11px;background:#1c7ed6;color:#fff;border-radius:999px;padding:2px 8px;font-weight:700}
+.dev ol{margin:4px 0 0;padding-left:20px;font-size:14px}.dev li{margin:4px 0}
+.offl{margin-top:16px;background:var(--card2);border:1px dashed #4dabf7;border-radius:14px;padding:14px 16px}
+.offl h3{margin:0 0 6px;font-size:15px}
+.offl p{margin:4px 0 10px;color:var(--mut);font-size:14px}
+a.insbtn{display:inline-block;text-decoration:none;text-align:center}
+.inslink{display:inline-block;margin-top:8px;color:#4dabf7;background:none;border:0;font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 /* escolha de modo */
 .chooser{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
 .chooser.hide{display:none}
@@ -175,6 +197,7 @@ footer{color:var(--mut);font-size:12px;text-align:center;margin-top:24px;line-he
       <button class="choice res" id="pickRes" type="button"><div class="ic">🧪</div><b>Resina (SLA / LCD)</b><span>Elegoo Mars/Saturn, Anycubic Photon, Creality Halot, Formlabs…</span></button>
     </div>
     <p class="sub" style="margin-top:18px;font-size:12.5px">Dá para trocar depois pelas abas no topo.</p>
+    <button type="button" class="inslink" id="pickIns">📥 Instalar no PC, celular ou tablet (funciona sem internet)</button><br>
     <button type="button" class="doelink" id="pickDoe">❤️ Gostou? Apoie o projeto</button>
   </div>
 </div>
@@ -184,7 +207,7 @@ footer{color:var(--mut);font-size:12px;text-align:center;margin-top:24px;line-he
   <div><h1>Calculadora de Impressão 3D</h1><p>Custo real, preço de venda e lucro — grátis</p></div>
 </header>
 
-<nav class="tabs" role="tablist"><button type="button" id="tabFdm" role="tab">🧵 Filamento</button><button type="button" id="tabRes" class="res" role="tab">🧪 Resina</button><button type="button" id="tabDoe" class="doe" role="tab">❤️ Apoiar</button></nav>
+<nav class="tabs" role="tablist"><button type="button" id="tabFdm" role="tab">🧵 Filamento</button><button type="button" id="tabRes" class="res" role="tab">🧪 Resina</button><button type="button" id="tabIns" class="ins" role="tab">📥 Instalar</button><button type="button" id="tabDoe" class="doe" role="tab">❤️ Apoiar</button></nav>
 <section class="mode" id="modeFdm">
 <div class="grid">
 <main>
@@ -419,6 +442,29 @@ footer{color:var(--mut);font-size:12px;text-align:center;margin-top:24px;line-he
   </section>
 </aside>
 </div>
+</section>
+
+<section class="mode" id="modeIns">
+  <section class="card">
+    <h2>📥 Instalar e usar sem internet</h2>
+    <div class="insbig">
+      <div class="ic">📲</div>
+      <p>Instale a calculadora como <b>aplicativo</b>. Ela ganha ícone próprio, abre numa janela própria, sem a barra do navegador, e <b>funciona sem internet</b>. É grátis e não precisa de loja.</p>
+      <div id="insState"></div>
+      <button class="insbtn" id="insBtn" type="button" style="display:none">⬇️ Instalar app agora</button>
+    </div>
+    <div class="devs" id="devs">
+      <div class="dev" data-dev="android"><h3>🤖 Android (celular/tablet)</h3><ol><li>Abra este site no <b>Chrome</b>.</li><li>Toque no botão azul <b>Instalar app agora</b> (acima). Se não aparecer, use o menu <b>⋮</b> → <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li><li>Pronto: o ícone fica junto com os outros apps.</li></ol></div>
+      <div class="dev" data-dev="ios"><h3>🍎 iPhone / iPad</h3><ol><li>Abra este site no <b>Safari</b> (precisa ser o Safari).</li><li>Toque em <b>Compartilhar</b> (quadrado com seta ↑).</li><li>Role e toque em <b>Adicionar à Tela de Início</b> → <b>Adicionar</b>.</li></ol></div>
+      <div class="dev" data-dev="windows"><h3>🪟 Windows / Linux</h3><ol><li>Abra no <b>Chrome</b> ou <b>Edge</b>.</li><li>Clique em <b>Instalar app agora</b> (acima) ou no ícone de instalar, um monitor com seta, na barra de endereço.</li><li>O app vai para o <b>Menu Iniciar</b> e para a área de trabalho.</li></ol></div>
+      <div class="dev" data-dev="mac"><h3>💻 Mac</h3><ol><li><b>Safari:</b> menu <b>Arquivo → Adicionar ao Dock</b>.</li><li><b>Chrome/Edge:</b> clique em <b>Instalar app agora</b> (acima) ou no ícone de instalar na barra de endereço.</li></ol></div>
+    </div>
+    <div class="offl">
+      <h3>💾 Versão offline em arquivo (PC e Mac)</h3>
+      <p>Baixe a calculadora inteira num <b>único arquivo</b>. Guarde onde quiser (pendrive, área de trabalho) e abra com dois cliques, mesmo <b>sem internet</b>. Para receber atualizações, é só baixar de novo.</p>
+      <a class="insbtn sec" id="dlFile" href="index.html" download="Calculadora-Impressao-3D.html">⬇️ Baixar arquivo offline (.html)</a>
+    </div>
+  </section>
 </section>
 
 <section class="mode" id="modeDoe">
@@ -695,24 +741,38 @@ makeSearch('r_busca','r_results',RESINS,p=>{$('r_marca').value=p.marca;rFill(p.m
 $('r_busca').placeholder=`Buscar entre ${RESINS.length-1} modelos de ${rbrands.length-1} marcas (ex.: Saturn, Photon)`;
 
 /* ================= ESCOLHA DO MODO ================= */
-function setMode(m){if(m!=='doe'){st.modo=m;save();}
+function setMode(m){if(m!=='doe'&&m!=='ins'){st.modo=m;save();}
   $('modeDoe').classList.toggle('on',m==='doe');$('tabDoe').classList.toggle('on',m==='doe');
+  $('modeIns').classList.toggle('on',m==='ins');$('tabIns').classList.toggle('on',m==='ins');
   $('modeFdm').classList.toggle('on',m==='fdm');$('modeRes').classList.toggle('on',m==='res');
   $('tabFdm').classList.toggle('on',m==='fdm');$('tabRes').classList.toggle('on',m==='res');
-  $('chooser').classList.add('hide');document.title=(m==='res'?'Resina':m==='doe'?'Apoiar':'Filamento')+' – Calculadora de Impressão 3D';
-  try{history.replaceState(null,'','#'+(m==='res'?'resina':m==='doe'?'apoiar':'filamento'));}catch(e){}
+  $('chooser').classList.add('hide');document.title=(m==='res'?'Resina':m==='doe'?'Apoiar':m==='ins'?'Instalar':'Filamento')+' – Calculadora de Impressão 3D';
+  try{history.replaceState(null,'','#'+(m==='res'?'resina':m==='doe'?'apoiar':m==='ins'?'instalar':'filamento'));}catch(e){}
   window.scrollTo(0,0);}
 $('pickFdm').onclick=()=>setMode('fdm');$('pickRes').onclick=()=>setMode('res');
-$('tabFdm').onclick=()=>setMode('fdm');$('tabRes').onclick=()=>setMode('res');$('tabDoe').onclick=()=>setMode('doe');$('pickDoe').onclick=()=>setMode('doe');
+$('tabFdm').onclick=()=>setMode('fdm');$('tabRes').onclick=()=>setMode('res');$('tabDoe').onclick=()=>setMode('doe');$('pickDoe').onclick=()=>setMode('doe');$('tabIns').onclick=()=>setMode('ins');$('pickIns').onclick=()=>setMode('ins');
 $('copyPhone').onclick=async()=>{const n='86988477452';try{await navigator.clipboard.writeText(n);toast('Chave PIX copiada!');}catch(e){const ta=document.createElement('textarea');ta.value=n;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Chave PIX copiada!');}catch(_){toast('Copie: (86) 98847-7452');}ta.remove();}};
 if(st.modo==='res')$('pickRes').classList.add('last');else if(st.modo==='fdm')$('pickFdm').classList.add('last');
 const hm=location.hash.replace('#','');
-if(hm==='resina')setMode('res');else if(hm==='filamento')setMode('fdm');else if(hm==='apoiar')setMode('doe');
+if(hm==='resina')setMode('res');else if(hm==='filamento')setMode('fdm');else if(hm==='apoiar')setMode('doe');else if(hm==='instalar')setMode('ins');
 
 /* ---------- instalar como app (PWA) ---------- */
 let deferred=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBox').style.display='flex';});
-$('install').onclick=async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;$('installBox').style.display='none';};
+const ua=navigator.userAgent||'';
+const DEV=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?'ios':/Android/i.test(ua)?'android':/Mac/i.test(ua)?'mac':'windows';
+const standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+document.querySelectorAll('.dev').forEach(d=>{if(d.dataset.dev===DEV){d.classList.add('me');d.querySelector('h3').insertAdjacentHTML('beforeend','<span class="tag">seu aparelho</span>');d.parentNode.prepend(d);}});
+function insUI(){
+  if(standalone){$('insState').innerHTML='<div class="insok">✅ Você já está usando o app instalado. Ele funciona sem internet.</div>';$('insBtn').style.display='none';return;}
+  if(deferred){$('insBtn').style.display='inline-block';$('insState').innerHTML='';}
+  else{$('insBtn').style.display='none';$('insState').innerHTML='<p style="margin:0">Siga o passo a passo do <b>seu aparelho</b> abaixo 👇</p>';}
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBox').style.display='flex';insUI();});
+window.addEventListener('appinstalled',()=>{deferred=null;$('installBox').style.display='none';$('insState').innerHTML='<div class="insok">✅ App instalado! Procure o ícone “Calc 3D” no seu aparelho.</div>';$('insBtn').style.display='none';});
+const doInstall=async()=>{if(!deferred){setMode('ins');return;}deferred.prompt();await deferred.userChoice;deferred=null;$('installBox').style.display='none';insUI();};
+$('install').onclick=doInstall;$('insBtn').onclick=doInstall;
+if(DEV==='ios'||DEV==='android'){const f=document.querySelector('.offl');if(f)f.style.display='none';}
+insUI();
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 
 calc();
