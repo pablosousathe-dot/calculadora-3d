@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
-  "notas": "Novidades: botão de orçamento para o cliente (só o valor final), prazos de produção e entrega opcionais e vários filamentos (cores e marcas) somados na mesma peça.",
+  "version": "1.3.1",
+  "notas": "Agora sem limite de filamentos: adicione quantas cores e marcas precisar (site e planilha).",
   "aviso": null
 }
