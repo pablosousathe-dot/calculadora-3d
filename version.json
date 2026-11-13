@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
-  "notas": "Novidade (opcional): custos do negócio – impostos (MEI, Simples Nacional, Lucro Presumido), custos fixos do mês (contador, marketing, video maker…) e tráfego pago.",
+  "version": "1.4.1",
+  "notas": "Novidades: data do orçamento e validade do orçamento (opcional) no orçamento para o cliente. Na planilha, o orçamento para o cliente fica pronto para copiar.",
   "aviso": null
 }
