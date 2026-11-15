@@ -1,0 +1,36 @@
+{
+  "v": 1,
+  "promo": {
+    "ativa": true,
+    "titulo": "🔥 Promoção de lançamento – tempo limitado",
+    "ate": ""
+  },
+  "teste": 7,
+  "obs": "",
+  "planos": [
+    {
+      "id": "m1",
+      "nome": "Mensal",
+      "meses": 1,
+      "de": 20,
+      "por": 10,
+      "on": true
+    },
+    {
+      "id": "m6",
+      "nome": "Semestral",
+      "meses": 6,
+      "de": 120,
+      "por": 54,
+      "on": true
+    },
+    {
+      "id": "m12",
+      "nome": "Anual",
+      "meses": 12,
+      "de": 240,
+      "por": 96,
+      "on": true
+    }
+  ]
+}
