@@ -1,6 +1,6 @@
 {
-  "versaoAtual": 4,
+  "versaoAtual": 5,
   "versaoMinima": 3,
-  "mensagem": "Versão 0.4: escolha de tema claro/escuro e tela ajustada para tablets.",
+  "mensagem": "Versão 0.5: agora dá para escolher um modo diferente para a Uber e para a 99 (ex.: Uber só avisando e 99 no automático).",
   "link": "https://github.com/pablosousathe-dot/calculadora-3d/raw/filtro-controle/apk/FiltroCorridas.apk"
 }
