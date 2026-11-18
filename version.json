@@ -1,5 +1,5 @@
 {
-  "version": "1.5.1",
-  "notas": "Proteção da assinatura Completo: verificação online leve (só chave e aparelho), bloqueio de chaves copiadas e funcionamento offline por até 7 dias.",
+  "version": "1.5.2",
+  "notas": "Novo: pop-up da promoção do Completo com a lista de todos os recursos; tabela Grátis × Completo atualizada.",
   "aviso": null
 }
