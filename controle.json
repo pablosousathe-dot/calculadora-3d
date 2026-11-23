@@ -1,6 +1,6 @@
 {
-  "versaoAtual": 5,
+  "versaoAtual": 6,
   "versaoMinima": 3,
-  "mensagem": "Versão 0.5: agora dá para escolher um modo diferente para a Uber e para a 99 (ex.: Uber só avisando e 99 no automático).",
+  "mensagem": "Versão 0.6: o Modo teste real agora grava também a tela da oferta de corrida (janela que aparece por cima da Uber/99). Atualize e mande uma nova captura.",
   "link": "https://github.com/pablosousathe-dot/calculadora-3d/raw/filtro-controle/apk/FiltroCorridas.apk"
 }
